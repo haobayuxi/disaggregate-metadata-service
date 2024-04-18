@@ -104,8 +104,8 @@ int ResourceManager::register_main_memory(void *addr, size_t length, int perm) {
 int ResourceManager::register_device_memory(size_t length, int perm) {
   struct ibv_exp_alloc_dm_attr attr;
   attr.length = length;
-  attr.exp_log_align_req = 3;  // 8-byte aligned
-  attr.exp_comp_mask = 0;
+  attr.log_align_req = 3;  // 8-byte aligned
+  attr.comp_mask = 0;
   ibv_exp_dm *dm = ibv_exp_alloc_dm(ib_ctx_, &attr);
   if (!dm) {
     SDS_PERROR("ibv_alloc_dm");
@@ -114,7 +114,7 @@ int ResourceManager::register_device_memory(size_t length, int perm) {
 
   char *buf = new char[length];
   memset(buf, 0, length);
-  if (ibv_exp_memcpy_to_dm(dm, 0, buf, length)) {
+  if (ibv_exp_memcpy_dm(dm, 0, buf, length)) {
     SDS_PERROR("ibv_memcpy_to_dm");
     ibv_exp_free_dm(dm);
     return -1;
@@ -122,7 +122,7 @@ int ResourceManager::register_device_memory(size_t length, int perm) {
   delete[] buf;
 
   perm |= IBV_ACCESS_ZERO_BASED;
-  ibv_exp_mr *mr = ibv_exp_reg_dm_mr(ib_pd_, dm, 0, length, perm);
+  ibv_exp_mr *mr = ibv_exp_reg_mr(ib_pd_, dm, 0, length, perm);
   if (!mr) {
     SDS_PERROR("ibv_reg_dm_mr");
     ibv_exp_free_dm(dm);
@@ -138,8 +138,8 @@ int ResourceManager::copy_from_device_memory(void *dst_addr,
                                              uint64_t src_offset,
                                              size_t length) {
   assert(dm_list_[DEVICE_MEMORY_MR_ID]);
-  int rc = ibv_exp_memcpy_from_dm(dst_addr, dm_list_[DEVICE_MEMORY_MR_ID],
-                                  src_offset, length);
+  int rc = ibv_exp_memcpy_dm(dst_addr, dm_list_[DEVICE_MEMORY_MR_ID],
+                             src_offset, length);
   if (rc) {
     SDS_PERROR("ibv_memcpy_from_dm");
   }
@@ -149,8 +149,8 @@ int ResourceManager::copy_from_device_memory(void *dst_addr,
 int ResourceManager::copy_to_device_memory(uint64_t dst_offset, void *src_addr,
                                            size_t length) {
   assert(dm_list_[DEVICE_MEMORY_MR_ID]);
-  int rc = ibv_exp_memcpy_to_dm(dm_list_[DEVICE_MEMORY_MR_ID], dst_offset,
-                                src_addr, length);
+  int rc = ibv_exp_memcpy_dm(dm_list_[DEVICE_MEMORY_MR_ID], dst_offset,
+                             src_addr, length);
   if (rc) {
     SDS_PERROR("ibv_memcpy_to_dm");
   }
