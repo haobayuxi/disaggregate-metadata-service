@@ -224,8 +224,8 @@ class ResourceManager {
  private:
   struct ibv_context *ib_ctx_;
   struct ibv_pd *ib_pd_;
-  struct ibv_exp_mr *mr_list_[kMemoryRegions];
-  struct ibv_exp_dm *dm_list_[kMemoryRegions];
+  struct ibv_mr *mr_list_[kMemoryRegions];
+  struct ibv_dm *dm_list_[kMemoryRegions];
   RemoteNode *node_list_;
   Resource resource_;
   uint16_t ib_lid_;
