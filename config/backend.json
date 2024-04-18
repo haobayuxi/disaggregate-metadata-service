@@ -1,6 +1,0 @@
-{
-  "dev_dax_path": "",
-  "capacity": 40000,
-  "tcp_port": 12345,
-  "nic_numa_node": 1
-}

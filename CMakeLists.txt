@@ -1,16 +1,33 @@
-cmake_minimum_required(VERSION 3.16)
-project(sds CXX ASM)
+# Author: Ming Zhang
+# Copyright (c) 2022
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-O3 -g")
+cmake_minimum_required(VERSION 3.3)
 
-include_directories(include)
+project(FORD)
 
-add_subdirectory(util)
-add_subdirectory(smart)
+set(CMAKE_CXX_STANDARD 11)
 
-add_subdirectory(test)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result -fPIC")
 
-# add_subdirectory(hashtable)
-# add_subdirectory(btree)
-add_subdirectory(dtx)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -DDEBUG -g")
+endif()
+
+include_directories(
+    core
+    workload
+    thirdparty
+    compute_pool
+)
+
+add_subdirectory(thirdparty/rlib)
+
+add_subdirectory(core)
+
+add_subdirectory(workload)
+
+add_subdirectory(compute_pool) # Dep list: rlib->ford->workload_db+_txn->worker
+
+add_subdirectory(memory_pool) # Dep list: rlib->workload_db->server

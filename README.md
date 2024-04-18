@@ -1,242 +1,103 @@
-# SMART
+# FORD
+This is an open source repository for our papers in [FAST 2022](https://www.usenix.org/conference/fast22) and [ACM Transactions on Storage](https://dl.acm.org/journal/tos).
 
-SMART is a framework to deal with the complexity of building scalable applications for memory disaggregation, which integrated with the following techniques to resolve RDMA-related performance issues:
-- Thread-aware resource allocation,
-- Adaptive work request throttling, and
-- Conflict avoidance technique.
+> **Ming Zhang**, Yu Hua, Pengfei Zuo, and Lurong Liu. "FORD: Fast One-sided RDMA-based Distributed Transactions for Disaggregated Persistent Memory". In 20th USENIX Conference on File and Storage Technologies, FAST 2022, Santa Clara, California, USA, February 22 - 24, 2022, pages 51-68. USENIX Association, 2022.
+>
+> **Ming Zhang**, Yu Hua, Pengfei Zuo, and Lurong Liu. "Localized Validation Accelerates Distributed Transactions on Disaggregated Persistent Memory". ACM Transactions on Storage (TOS), 2023.
 
-To ease the programming, SMART provides a set of coroutine-based asynchronous APIs that are almost identical to the original RDMA verbs. We also design adaptive methods for adjusting configuration parameters that are important to the performance.
+# Brief Introduction
+Persistent memory (PM) disaggregation improves the resource utilization and failure isolation to build a scalable and cost-effective remote memory pool. However, due to offering limited computing power and overlooking the persistence and bandwidth properties of real PMs, existing distributed transaction schemes, which are designed for legacy DRAM-based monolithic servers, fail to efficiently work on the disaggregated PM architecture.
 
-For more technical details, please refer to our paper: 
+We propose FORD, a **F**ast **O**ne-sided **R**DMA-based **D**istributed transaction system. FORD thoroughly leverages one-sided RDMA to handle transactions for bypassing the remote CPU in PM pool. To reduce the round trips, FORD batches the read and lock operations into one request to eliminate extra locking and validations. To accelerate the transaction commit, FORD updates all the remote replicas in a single round trip with parallel undo logging and data visibility control. Moreover, considering the limited PM bandwidth, FORD enables the backup replicas to be read to alleviate the load on the primary replicas, thus improving the throughput. To efficiently guarantee the remote data persistency in the PM pool, FORD selectively flushes data to the backup replicas to mitigate the network overheads. FORD further leverages a localized validation scheme to transfer the validation operations for the read-only data from remote to local as much as possible to reduce the round trips. Experimental results demonstrate that FORD improves the transaction throughput and reduces the latency. To learn more, please read our papers.
 
-> Feng Ren, Mingxing Zhang, Kang Chen, Huaxia Xia, Zuoning Chen, Yongwei Wu. Scaling Up Memory Disaggregated Applications with SMART. In 29th ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS '24).
+# Framework
+We implement a coroutine-enabled framework that runs FORD and its counterparts in the same manner when processing distributed transactions: 1) Issue one-sided RDMA requests. 2) Yield CPU to another coroutine. 3) Check all the RDMA ACKs and replies. This is in fact an interleaved execution model that aims to saturate the CPUs in the compute pool to improve the throughput.
 
-## Artifact Contents
-- SMART’s library (including techniques mentioned in this paper, `include/` and `smart/`);
-- Synthesis workloads (`test/`)
-- Applications: SMART-HT (derived from RACE, `hashtable/`), SMART-BT (derived from Sherman, `btree/`) and SMART-DTX (derived from FORD, `dtx/`).
-- Reproduce scripts (`ae/`)
+# Prerequisites to Build
+- Hardware
+  - Intel Optane DC Persistent Memory
+  - Mellanox InfiniBand NIC (e.g., ConnectX-5) that supports RDMA
+  - Mellanox InfiniBand Switch
+- Software
+  - Operating System: Ubuntu 18.04 LTS or CentOS 7
+  - Programming Language: C++ 11
+  - Compiler: g++ 7.5.0 (at least)
+  - Libraries: ibverbs, pthread, boost_coroutine, boost_context, boost_system
+- Machines
+  - At least 3 machines, in which one acts as the compute pool and other two act as the memory pool to maintain a primary-backup replication
 
-## System Requirements
-* **Mellanox InfiniBand RNIC** (ConnectX-6 in our testbed). Mellanox OpenFabrics Enterprise Distribution for Linux (MLNX_OFED) v5.3-1.0.0.1. Other OFED versions are under testing.
 
-* **Optane DC PMEM (optional)**, configured as DEVDAX mode and mounted to `/dev/dax1.0`. Optane DC PMEM is used for evaulating distributed persistent transactions (`dtx/`) in our paper. However, it is okay to perform these tests using DRAM only. We provide an option `dev_dax_path` in configuration file `config/backend.json`, that specifies the PMEM DEVDAX device (e.g. `/dev/dax1.0`) to be used. By default, the value of `dev_dax_path` is an empty string, which indicates that only DRAM is used. If PMEM exists, Run command `sudo chmod 777 /dev/dax1.0` that allows unprevileged users to manipulate PMEM data.
+# Configure
+- Configure all the options in ```compute_node_config.json``` and ```memory_node_config.json``` in ```config/``` as you need, e.g., machine_num, machine_id, ip, port, and PM path, etc.
+- Configure the options in ```core/flags.h```, e.g., ```MAX_ITEM_SIZE```, etc.
+- Configure the number of backup replicas in ```core/base/common.h```, i.e., BACKUP_DEGREE.
 
-* **Build Toolchain**: GCC = 9.4.0 or newer, CMake = 3.16.3 or newer.
+# Build
+The codes are constructed by CMake (version >= 3.3). We prepare a shell script for easy building
 
-* **Other Software**: libnuma, clustershell, Python 3 (with matplotlib, numpy, python-tk)
-
-<details>
-  <summary>Evaluation setup in this paper</summary>
-  
-  ### Hardware dependencies
-  - **CPU**: Two-socket Intel Xeon Gold 6240R CPU (96 cores in total)
-  - **Memory**: 384GB DDR4 DRAM (2666MHz)
-  - **Persistent Memory**: 1.5TB (128GB*12) Intel Optane DC Persistent Memory (1st Gen) with DEVDAX mode
-  - **RNIC**: 200Gbps Mellanox ConnectX-6 InfiniBand RNIC. Each RNIC is connected to a 200 Gbps Mellanox InfiniBand switch
-
-  ### Software dependencies
-  - **RNIC Driver**: Mellanox OpenFabrics Enterprise Distribution for Linux (MLNX_OFED) v5.x (v5.3-1.0.0.1 in this paper).
-</details>
-
-## Build & Install
-
-### Build `SMART`
-Execute the following command in your terminal:
-```bash
-bash ./deps.sh
-bash ./build.sh
+```sh
+$ git clone https://github.com/minghust/ford.git
+$ cd ford
 ```
 
-### Patch the RDMA Core Library
-We provide a patched RDMA core library that unlimits the number of median-latency doorbell registers per RDMA context. However, if the installed version of MLNX_OFED is **NOT** v5.3-1.0.0.1, you must patch the library by yourself, and replace the `build/libmlx5.so` file. The guide is provided [here](patch/guide.md).
+- For each machine in the memory pool: 
 
-## Functional Evaluation: Basic Test
-We provide a micro benchmark program `test/test_rdma` in SMART. It can be used to evaluate the throughput of RDMA READs/WRITEs between two servers. Note that the optimizations of SMART are enabled by default.
-
-### Step 1: Setting Parameters
-
-1. Set the server hostname, access granularity and type in `config/test_rdma.json`:
-   ```json
-   {
-      "servers": [
-         "optane06"     // the hostname of server side
-      ],
-      "port": 12345,    // TCP port for connection establishation
-      "block_size": 8,  // access granularity in bytes
-      "dump_file_path": "test_rdma.csv",  // path of dump file
-      "type": "read"    // can be `read`, `write` or `atomic`
-   }
-   ```
-2. Set RDMA device and enabled optimizations in `config/smart_config.json`:
-   ```json
-   {
-      "infiniband": {
-         "name": "",    // `mlx5_0` by default
-         "port": 1
-      },
-
-      // available optimizations
-      "use_thread_aware_alloc": true, 
-      "thread_aware_alloc": {
-         "total_uuar": 100,    // >= shared_uuar
-         "shared_uuar": 96,    // >= thread count
-         "shared_cq": true
-      },
-
-      "use_work_req_throt": true,
-      "use_conflict_avoidance": true,
-      "use_speculative_lookup": true,
-   }
-   ```
-
-### Step 2: Run Server
-In server side (`optane06` in the sample), run the following command:
-```bash
-cd /path/to/smart && cd build
-LD_PRELOAD=libmlx5.so ./test/test_rdma
+```sh 
+$ ./build.sh -s
 ```
 
-### Step 3: Run Client 
-In another machine, run the following command:
-```bash
-cd /path/to/smart && cd build
-LD_PRELOAD=libmlx5.so ./test/test_rdma \
-   [nr_thread] \
-   [outstanding_work_request_per_thread]
-```
-For example,
-```bash
-LD_PRELOAD=libmlx5.so ./test/test_rdma 96 8
-```
-### Result
-After execution, the client displays the following information to stdout. 
-```
-rdma-read: #threads=96, #depth=8, #block\_size=8, BW=848.217 MB/s, IOPS=111.177 M/s, conn establish time=1245.924 ms
-```
-It also append a line to `test_rdma.csv` (specified by `"dump_file_path"`):
-```
-rdma-read, 96, 8, 8, 848.217, 111.177, 1245.924
+- For each machine in the compute pool (boost is required):
+
+```sh 
+$ ./build.sh
 ```
 
-## Functional Evaluation: Applications
-For the sake of illustration, we present the functional evaluation method based on the following cluster. 
-- **Memory Blades**: hostname `optane06` and `optane07`, with TCP port `12345`,
-- **Compute Blades**: hostname `optane04`
+Note that the Release version is the default option for better performance. However, if you need a Debug version, just add ```-d``` option, e.g., ```./build.sh -s -d``` for the memory pool, and ```./build.sh -d``` for the compute pool.
 
-### Configuration Files
+After running the ```build.sh``` script, cmake will automatically generate a ```build/``` directory in which all the compiled libraries and executable files are stored.
 
-SMART and its applications rely on multiple configuration files. By default, they are located in the `config/` subdirectory. You can use other files using environment variables `SMART_CONFIG_PATH` and `APP_CONFIG_PATH`.
 
-#### 1. `smart_config.json`
-Options of the SMART framework, which are appliable to all kinds of servers. See [here](#step-1-setting-parameters) in detail.
-  
-#### 2. `backend.json`
-Options of backend servers running in memory blades. 
-```json
-{
-  "dev_dax_path": "", // empty string for DRAM, /dev/daxX.Y for NVM
-  "capacity": 16000,  // amount of memory to use (MiB)
-  "tcp_port": 12345,  // Listen TCP port
-  "nic_numa_node": 1  // Prefer bind socket
-}
+# Run
+- For each machine in the memory pool: Start server to load tables. Due to using PM in *devdax* mode, you may need ```sudo``` if you are not a root user.
+```sh
+$ cd ford
+$ cd ./build/memory_pool/server
+$ sudo ./zm_mem_pool
 ```
 
-#### 3A. `datastructure.json`
-Options of hashtable/B+tree clients running in the compute blades. Use `memory_servers` to specify **hostnames and ports** of memory blades to be connected. If you change the topology of the cluster, modify it accordingly.
-```json
-{
-  "dataset": "ycsb-a",   // see "include/util/ycsb.h" for available datasets
-  "dump_file_path": "datastructure.csv",
-
-  "insert_before_execution": true, // insert all keys before performing tests
-  "max_key": 100000000,  // key range [0, max_key)
-  "key_length": 8,       // key length in bytes
-  "value_length": 8,     // value length in bytes
-  "rehash_key": false,   // key/value randomly inserted
-  "duration": 15,        // test duration in seconds
-  "zipfian_const": 0.99, // zipfian parameter
-
-  "memory_servers": [    // memory server hostnames and ports
-    {
-      "hostname": "optane06",
-      "port": 12345
-    },
-    {
-      "hostname": "optane07",
-      "port": 12345
-    }
-  ]
-}
+- For each machine in the compute pool: After loading database tables in the memory pool, we run a benchmark, e.g., TPCC.
+```sh
+$ cd ford
+$ cd ./build/compute_pool/run
+$ ./run tpcc ford 16 8 # run ford with 16 threads and each thread spawns 8 coroutines
 ```
-  
-#### 3B. `transaction.json`
-Options of transaction processing clients running in the compute blades. Use `memory_servers` to specify **hostnames and ports** of memory blades to be connected. If you change the topology of the cluster, modify it accordingly.
-```json
-{
-  "memory_servers": [
-    {
-      "hostname": "optane06",
-      "port": 12345
-    },
-    {
-      "hostname": "optane07",
-      "port": 12345
-    }
-  ],
-  "tpcc": { ... },
-  "smallbank": { ... },
-  "tatp": { ... },
-  "nr_transactions": 60000000,
-  "dump_file_path": "dtx.csv"
-}
+Now, the memory nodes are in a disaggregated mode, i.e., the CPUs are not used for any computation tasks in transaction processing.
+
+# Results
+After running, we automatically generate a ```bench_results``` dir to record the results. The summarized attempted and committed throughputs (K txn/sec) and the average 50th and 99th percentile latencies are recorded in ```bench_results/tpcc/result.txt```. Moreover, the detailed results of each thread are recorded in ```bench_results/tpcc/detail_result.txt``` 
+
+# Acknowledgments
+
+We sincerely thank the following open source repos (in the ```thirdparty/``` directory) that help us shorten the developing process
+
+- [rlib](https://github.com/wxdwfc/rlib): We use rlib to do RDMA connections. This is a convinient and easy-to-understand library to finish RDMA connections. Moreover, we have modified rlib : 1) Fix a bug in en/decoding the QP id. 2) Change the QP connections from the active mode to the passive mode in the server side. In this way, all the QP connections are completed without explict ```connect``` usages in the server-side code. This is beneficial for the case in which the server does not know how many clients will issue the connect requests.
+
+- [rapidjson](https://github.com/Tencent/rapidjson): We use rapidjson to read configurations from json files. This is an easy-to-use library that accelerate configurations.
+
+# LICENSE
+
+```text
+Copyright [2022] [Ming Zhang]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
-
-### Start Memory Blades
-For each memory blade **(`optane06` and `optane07` in our example)**, run one of the following programs:
-   ```bash
-   # working path should be build/
-
-   # start hash table backend
-   LD_PRELOAD=libmlx5.so ./hashtable/hashtable_backend 
-
-   # start B+Tree backend
-   LD_PRELOAD=libmlx5.so ./btree/btree_backend
-
-   # start SmallBank backend
-   LD_PRELOAD=libmlx5.so ./dtx/smallbank/smallbank_backend
-
-   # start TATP backend
-   LD_PRELOAD=libmlx5.so ./dtx/tatp/tatp_backend
-   ```
-
-### Start Compute Blades
-In compute blades **(`optane04` in our example)**, run one of the benchmark program using the following command. It must match the backend started in the previous step. 
-
-```bash
-# working path should be build/
-
-# start hash table bench
-# `coro` means `coroutine`
-LD_PRELOAD=libmlx5.so ./hashtable/hashtable_bench [nr_thread] [nr_coro] 
-
-# start B+Tree bench
-LD_PRELOAD=libmlx5.so ./btree/btree_bench [nr_thread] [nr_coro] 
-
-# start SmallBank bench
-LD_PRELOAD=libmlx5.so ./dtx/smallbank/smallbank_bench [nr_thread] [nr_coro] 
-
-# start TATP bench
-LD_PRELOAD=libmlx5.so ./dtx/tatp/tatp_bench [nr_thread] [nr_coro] 
-```
-
-After execution, the benchmark program displays the throughput and latency to stdout. It also adds a line to the file specified by `dump_file_path`.
-
-
-## Reproduce Evaluation
-We also provide scripts to reproduce all experiments in Section 3 and Section 6. In Section 3, there are 3 experiments (Figures 3, 4 and 5), each of them points out one of the scalability bottlenecks. In Section 6, there are 9 experiments (Figures 7–14, and Table 1) that compare SMART-refactorized applications (i.e. SMART-HT, SMART-BT and SMART-DTX) with the state-of-the-art disaggregated systems (i.e. RACE, Sherman and FORD) respectively.
-
-Details are aviilable in [`ae/README.md`](ae/README.md).
-
-## Contact
-For any questions, please contact us at `renfeng.chn AT outlook.com`.
