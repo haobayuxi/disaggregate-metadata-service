@@ -3,6 +3,8 @@
 
 #include <unistd.h>
 
+#include <cstdint>
+
 enum META_SYS : int {
   OOCC = 0,
   DrTMH = 1,
@@ -19,11 +21,20 @@ enum META_OP : int {
 
 struct Inode {
   uint64_t id;
-  uint32_t atime;
-  uint32_t ctime;
-  uint32_t mtime;
+  uint16_t atime;
+  uint16_t ctime;
+  uint16_t mtime;
+  uint16_t btime;
   uint64_t permission;
+  uint64_t crc;
   char name[16];
+  bool lock;
 };
 
 
+class DIO{
+  public:
+  void ();
+
+  bool 
+};

@@ -530,7 +530,8 @@ int ResourceManager::create_queue_pair() {
       cq = resource_.cq_list[class_id]->cq;
     }
   } else {
-    cq = ibv_create_cq(ib_ctx_, config_.max_cqe_size, nullptr, nullptr, 0);
+    // cq = ibv_create_cq(ib_ctx_, config_.max_cqe_size, nullptr, nullptr, 0);
+    cq = ibv_exp_create_cq(ib_ctx_, config_.max_cqe_size, nullptr, nullptr, 0);
     if (!cq) {
       SDS_PERROR("ibv_create_cq");
       return -1;
