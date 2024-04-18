@@ -50,7 +50,7 @@ ResourceManager::ResourceManager() : max_node_id_(-1) {
     SDS_PERROR("ibv_query_device");
     exit(EXIT_FAILURE);
   }
-  assert(device_attr_.atomic_cap != IBV_ATOMIC_NONE);
+  assert(device_attr_.exp_atomic_cap != IBV_ATOMIC_NONE);
   // SDS_INFO("atomic_cap %d max qp %d", device_attr_.atomic_cap,
   // device_attr_.max_qp);
   ib_lid_ = port_attr_.lid;
@@ -104,8 +104,8 @@ int ResourceManager::register_main_memory(void *addr, size_t length, int perm) {
 int ResourceManager::register_device_memory(size_t length, int perm) {
   struct ibv_exp_alloc_dm_attr attr;
   attr.length = length;
-  attr.log_align_req = 3;  // 8-byte aligned
-  attr.comp_mask = 0;
+  attr.exp_log_align_req = 3;  // 8-byte aligned
+  attr.exp_comp_mask = 0;
   ibv_dm *dm = ibv_exp_alloc_dm(ib_ctx_, &attr);
   if (!dm) {
     SDS_PERROR("ibv_alloc_dm");
