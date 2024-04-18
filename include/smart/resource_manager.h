@@ -33,6 +33,7 @@
 #include <cstddef>
 #include <functional>
 #include <infiniband/verbs.h>
+#include <infiniband/verbs_exp.h>
 
 #include "common.h"
 

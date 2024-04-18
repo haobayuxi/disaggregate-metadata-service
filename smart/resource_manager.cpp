@@ -46,7 +46,7 @@ ResourceManager::ResourceManager() : max_node_id_(-1) {
     SDS_PERROR("ibv_query_port");
     exit(EXIT_FAILURE);
   }
-  if (ibv_query_device(ib_ctx_, &device_attr_)) {
+  if (ibv_exp_query_device(ib_ctx_, &device_attr_)) {
     SDS_PERROR("ibv_query_device");
     exit(EXIT_FAILURE);
   }

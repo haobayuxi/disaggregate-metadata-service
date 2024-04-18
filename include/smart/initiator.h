@@ -26,6 +26,7 @@
 #define SDS_INITIATOR_H
 
 #include <infiniband/verbs.h>
+#include <infiniband/verbs_exp.h>
 
 #include <atomic>
 #include <functional>
