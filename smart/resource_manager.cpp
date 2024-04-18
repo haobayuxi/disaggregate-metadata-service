@@ -32,7 +32,7 @@
 namespace sds {
 ResourceManager::ResourceManager() : max_node_id_(-1) {
   ibv_port_attr port_attr_;
-  ibv_exp_device_attr device_attr_;
+  ibv_device_attr device_attr_;
   std::fill(mr_list_, mr_list_ + kMemoryRegions, nullptr);
   std::fill(dm_list_, dm_list_ + kMemoryRegions, nullptr);
   node_list_ = new RemoteNode[config_.max_nodes];
@@ -46,11 +46,11 @@ ResourceManager::ResourceManager() : max_node_id_(-1) {
     SDS_PERROR("ibv_query_port");
     exit(EXIT_FAILURE);
   }
-  if (ibv_exp_query_device(ib_ctx_, &device_attr_)) {
+  if (ibv_query_device(ib_ctx_, &device_attr_)) {
     SDS_PERROR("ibv_query_device");
     exit(EXIT_FAILURE);
   }
-  assert(device_attr_.exp_atomic_cap != IBV_ATOMIC_NONE);
+  assert(device_attr_.atomic_cap != IBV_ATOMIC_NONE);
   // SDS_INFO("atomic_cap %d max qp %d", device_attr_.atomic_cap,
   // device_attr_.max_qp);
   ib_lid_ = port_attr_.lid;
@@ -77,7 +77,7 @@ ResourceManager::~ResourceManager() {
       ibv_dereg_mr(mr_list_[i]);
     }
     if (dm_list_[i]) {
-      ibv_exp_free_dm(dm_list_[i]);
+      ibv_free_dm(dm_list_[i]);
     }
   }
   if (ib_pd_) {
@@ -91,7 +91,7 @@ ResourceManager::~ResourceManager() {
 }
 
 int ResourceManager::register_main_memory(void *addr, size_t length, int perm) {
-  ibv_exp_mr *mr = ibv_reg_mr(ib_pd_, addr, length, perm);
+  ibv_mr *mr = ibv_reg_mr(ib_pd_, addr, length, perm);
   if (!mr) {
     SDS_PERROR("ibv_reg_mr");
     return -1;
@@ -102,11 +102,11 @@ int ResourceManager::register_main_memory(void *addr, size_t length, int perm) {
 }
 
 int ResourceManager::register_device_memory(size_t length, int perm) {
-  struct ibv_exp_alloc_dm_attr attr;
+  struct ibv_alloc_dm_attr attr;
   attr.length = length;
   attr.log_align_req = 3;  // 8-byte aligned
   attr.comp_mask = 0;
-  ibv_exp_dm *dm = ibv_exp_alloc_dm(ib_ctx_, &attr);
+  ibv_dm *dm = ibv_alloc_dm(ib_ctx_, &attr);
   if (!dm) {
     SDS_PERROR("ibv_alloc_dm");
     return -1;
@@ -114,18 +114,18 @@ int ResourceManager::register_device_memory(size_t length, int perm) {
 
   char *buf = new char[length];
   memset(buf, 0, length);
-  if (ibv_exp_memcpy_dm(dm, 0, buf, length)) {
+  if (ibv_memcpy_to_dm(dm, 0, buf, length)) {
     SDS_PERROR("ibv_memcpy_to_dm");
-    ibv_exp_free_dm(dm);
+    ibv_free_dm(dm);
     return -1;
   }
   delete[] buf;
 
   perm |= IBV_ACCESS_ZERO_BASED;
-  ibv_exp_mr *mr = ibv_exp_reg_mr(ib_pd_, dm, 0, length, perm);
+  ibv_mr *mr = ibv_reg_dm_mr(ib_pd_, dm, 0, length, perm);
   if (!mr) {
     SDS_PERROR("ibv_reg_dm_mr");
-    ibv_exp_free_dm(dm);
+    ibv_free_dm(dm);
     return -1;
   }
   assert(!mr_list_[DEVICE_MEMORY_MR_ID]);
@@ -138,8 +138,8 @@ int ResourceManager::copy_from_device_memory(void *dst_addr,
                                              uint64_t src_offset,
                                              size_t length) {
   assert(dm_list_[DEVICE_MEMORY_MR_ID]);
-  int rc = ibv_exp_memcpy_dm(dst_addr, dm_list_[DEVICE_MEMORY_MR_ID],
-                             src_offset, length);
+  int rc = ibv_memcpy_from_dm(dst_addr, dm_list_[DEVICE_MEMORY_MR_ID],
+                              src_offset, length);
   if (rc) {
     SDS_PERROR("ibv_memcpy_from_dm");
   }
@@ -149,8 +149,8 @@ int ResourceManager::copy_from_device_memory(void *dst_addr,
 int ResourceManager::copy_to_device_memory(uint64_t dst_offset, void *src_addr,
                                            size_t length) {
   assert(dm_list_[DEVICE_MEMORY_MR_ID]);
-  int rc = ibv_exp_memcpy_dm(dm_list_[DEVICE_MEMORY_MR_ID], dst_offset,
-                             src_addr, length);
+  int rc = ibv_memcpy_to_dm(dm_list_[DEVICE_MEMORY_MR_ID], dst_offset, src_addr,
+                            length);
   if (rc) {
     SDS_PERROR("ibv_memcpy_to_dm");
   }
@@ -530,8 +530,7 @@ int ResourceManager::create_queue_pair() {
       cq = resource_.cq_list[class_id]->cq;
     }
   } else {
-    // cq = ibv_create_cq(ib_ctx_, config_.max_cqe_size, nullptr, nullptr, 0);
-    cq = ibv_exp_create_cq(ib_ctx_, config_.max_cqe_size, nullptr, nullptr, 0);
+    cq = ibv_create_cq(ib_ctx_, config_.max_cqe_size, nullptr, nullptr, 0);
     if (!cq) {
       SDS_PERROR("ibv_create_cq");
       return -1;
