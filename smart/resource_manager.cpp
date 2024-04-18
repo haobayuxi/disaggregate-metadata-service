@@ -32,7 +32,7 @@
 namespace sds {
 ResourceManager::ResourceManager() : max_node_id_(-1) {
   ibv_port_attr port_attr_;
-  ibv_device_attr device_attr_;
+  ibv_exp_device_attr device_attr_;
   std::fill(mr_list_, mr_list_ + kMemoryRegions, nullptr);
   std::fill(dm_list_, dm_list_ + kMemoryRegions, nullptr);
   node_list_ = new RemoteNode[config_.max_nodes];
@@ -77,7 +77,7 @@ ResourceManager::~ResourceManager() {
       ibv_dereg_mr(mr_list_[i]);
     }
     if (dm_list_[i]) {
-      ibv_free_dm(dm_list_[i]);
+      ibv_exp_free_dm(dm_list_[i]);
     }
   }
   if (ib_pd_) {
@@ -102,11 +102,11 @@ int ResourceManager::register_main_memory(void *addr, size_t length, int perm) {
 }
 
 int ResourceManager::register_device_memory(size_t length, int perm) {
-  struct ibv_alloc_dm_attr attr;
+  struct ibv_exp_alloc_dm_attr attr;
   attr.length = length;
   attr.log_align_req = 3;  // 8-byte aligned
   attr.comp_mask = 0;
-  ibv_dm *dm = ibv_alloc_dm(ib_ctx_, &attr);
+  ibv_dm *dm = ibv_exp_alloc_dm(ib_ctx_, &attr);
   if (!dm) {
     SDS_PERROR("ibv_alloc_dm");
     return -1;
