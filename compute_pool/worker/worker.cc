@@ -14,9 +14,6 @@
 #include "connection/qp_manager.h"
 #include "dtx/dtx.h"
 #include "micro/micro_txn.h"
-#include "smallbank/smallbank_txn.h"
-#include "tatp/tatp_txn.h"
-#include "tpcc/tpcc_txn.h"
 #include "util/latency.h"
 #include "util/zipf.h"
 
@@ -44,10 +41,6 @@ __thread t_id_t thread_gid;
 __thread t_id_t thread_local_id;
 __thread t_id_t thread_num;
 
-__thread TATP* tatp_client = nullptr;
-__thread SmallBank* smallbank_client = nullptr;
-__thread TPCC* tpcc_client = nullptr;
-
 __thread MetaManager* meta_man;
 __thread QPManager* qp_man;
 
@@ -57,10 +50,6 @@ __thread LockCache* lock_table;
 __thread RDMABufferAllocator* rdma_buffer_allocator;
 __thread LogOffsetAllocator* log_offset_allocator;
 __thread AddrCache* addr_cache;
-
-__thread TATPTxType* tatp_workgen_arr;
-__thread SmallBankTxType* smallbank_workgen_arr;
-__thread TPCCTxType* tpcc_workgen_arr;
 
 __thread coro_id_t coro_num;
 __thread CoroutineScheduler*
@@ -224,8 +213,6 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {
   uint64_t total_duration = 0;
   double average_lock_duration = 0;
 
-  
-
   /********************************** Stat end
    * *****************************************/
 
@@ -240,23 +227,6 @@ void run_thread(thread_params* params, TATP* tatp_cli, SmallBank* smallbank_cli,
   auto json_config = JsonConfig::load_file(config_filepath);
   auto conf = json_config.get(bench_name);
   ATTEMPTED_NUM = conf.get("attempted_num").get_uint64();
-
-  if (bench_name == "tatp") {
-    tatp_client = tatp_cli;
-    tatp_workgen_arr = tatp_client->CreateWorkgenArray();
-    thread_local_try_times = new uint64_t[TATP_TX_TYPES]();
-    thread_local_commit_times = new uint64_t[TATP_TX_TYPES]();
-  } else if (bench_name == "smallbank") {
-    smallbank_client = smallbank_cli;
-    smallbank_workgen_arr = smallbank_client->CreateWorkgenArray();
-    thread_local_try_times = new uint64_t[SmallBank_TX_TYPES]();
-    thread_local_commit_times = new uint64_t[SmallBank_TX_TYPES]();
-  } else if (bench_name == "tpcc") {
-    tpcc_client = tpcc_cli;
-    tpcc_workgen_arr = tpcc_client->CreateWorkgenArray();
-    thread_local_try_times = new uint64_t[TPCC_TX_TYPES]();
-    thread_local_commit_times = new uint64_t[TPCC_TX_TYPES]();
-  }
 
   stop_run = false;
   thread_gid = params->thread_global_id;
@@ -341,9 +311,6 @@ void run_thread(thread_params* params, TATP* tatp_cli, SmallBank* smallbank_cli,
   // Clean
   delete[] timer;
   delete addr_cache;
-  if (tatp_workgen_arr) delete[] tatp_workgen_arr;
-  if (smallbank_workgen_arr) delete[] smallbank_workgen_arr;
-  if (tpcc_workgen_arr) delete[] tpcc_workgen_arr;
   if (random_generator) delete[] random_generator;
   if (zipf_gen) delete zipf_gen;
   delete coro_sched;

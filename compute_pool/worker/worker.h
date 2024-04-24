@@ -8,10 +8,6 @@
 #include "cache/lock_status.h"
 #include "cache/version_status.h"
 #include "connection/meta_manager.h"
-
-#include "tatp/tatp_db.h"
-#include "smallbank/smallbank_db.h"
-#include "tpcc/tpcc_db.h"
 #include "micro/micro_db.h"
 
 struct thread_params {
@@ -27,7 +23,5 @@ struct thread_params {
   std::string bench_name;
 };
 
-void run_thread(thread_params* params,
-                TATP* tatp_client,
-                SmallBank* smallbank_client,
-                TPCC* tpcc_client);
+void run_thread(thread_params* params, TATP* tatp_client,
+                SmallBank* smallbank_client, TPCC* tpcc_client);
