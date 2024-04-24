@@ -38,7 +38,8 @@ enum class MicroTxType : int {
 
 // Table id
 enum class MicroTableType : uint64_t {
-  kMicroTable = TABLE_MICRO,
+  kMicroTable = 0,
+  kEntrylistTable = 1,
 };
 
 static ALWAYS_INLINE uint64_t align_pow2(uint64_t v) {
@@ -60,10 +61,11 @@ class MICRO {
 
   /* Tables */
   HashStore* micro_table;
+  HashStore* entrylist_table;
 
   std::vector<HashStore*> primary_table_ptrs;
 
-  std::vector<HashStore*> backup_table_ptrs;
+  // std::vector<HashStore*> backup_table_ptrs;
 
   // For server usage: Provide interfaces to servers for loading tables
   // Also for client usage: Provide interfaces to clients for generating ids
@@ -95,6 +97,6 @@ class MICRO {
   ALWAYS_INLINE
   std::vector<HashStore*> GetPrimaryHashStore() { return primary_table_ptrs; }
 
-  ALWAYS_INLINE
-  std::vector<HashStore*> GetBackupHashStore() { return backup_table_ptrs; }
+  // ALWAYS_INLINE
+  // std::vector<HashStore*> GetBackupHashStore() { return backup_table_ptrs; }
 };

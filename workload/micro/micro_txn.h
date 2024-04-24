@@ -9,17 +9,38 @@
 #include "micro/micro_db.h"
 #include "util/zipf.h"
 
-/******************** The business logic (Transaction) start ********************/
+/******************** The business logic (Transaction) start
+ * ********************/
 
-struct DataItemDuplicate {
-  DataItemPtr data_item_ptr;
-  bool is_dup;
+enum OP : int {
+  // meta op
+  m_getattr = 0,
+  m_lookup = 1,
+  m_create = 2,
+  m_unlink = 3,
+  m_rename = 4,
+  m_setattr = 5,
+  // file op
+  f_read = 6,
+  f_write = 7,
+  f_opendir = 8,
+  f_stat = 9,
+  f_open = 10,
+  f_create = 11,
+  f_unlink = 12,
+  f_rename = 13,
+  f_chmod_chown = 14,
+  f_mkdir = 15,
 };
 
-bool TxTestCachedAddr(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size, uint64_t num_keys_global, uint64_t write_ratio);
-bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size, uint64_t num_keys_global, uint64_t write_ratio);
-bool TxReadBackup(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size, uint64_t num_keys_global, uint64_t write_ratio);
-bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size, uint64_t num_keys_global, uint64_t write_ratio);
-bool TxRFlush1(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size, uint64_t num_keys_global, uint64_t write_ratio);
-bool TxRFlush2(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size, uint64_t num_keys_global, uint64_t write_ratio);
-/******************** The business logic (Transaction) end ********************/
+bool TxTestCachedAddr(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
+                      tx_id_t tx_id, DTX* dtx, bool is_skewed,
+                      uint64_t data_set_size, uint64_t num_keys_global,
+                      uint64_t write_ratio);
+bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
+                      tx_id_t tx_id, DTX* dtx, bool is_skewed,
+                      uint64_t data_set_size, uint64_t num_keys_global,
+                      uint64_t write_ratio);
+bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
+                tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
+                uint64_t num_keys_global, uint64_t write_ratio);
