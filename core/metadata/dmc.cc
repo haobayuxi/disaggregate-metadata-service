@@ -2,7 +2,8 @@
 
 DMC::DMC(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
          t_id_t tid, coro_id_t coroid, CoroutineScheduler* sched,
-         RDMABufferAllocator* rdma_buffer_allocator, AddrCache* addr_buf, DMC_TYPE type) {
+         RDMABufferAllocator* rdma_buffer_allocator, AddrCache* addr_buf,
+         DMC_TYPE type) {
   t_id = tid;
   coro_id = coroid;
   coro_sched = sched;
@@ -19,17 +20,25 @@ bool DMC::open(string path, coro_yield_t& yield) {
   // You can read from primary or backup
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-
-  if (dmc_type == DMC_TYPE::native) {
+  vector<> paths = if (dmc_type == DMC_TYPE::native) {
     // get all the inode
-
-  } else if (dmc_type == DMC_TYPE::disaggregated) {
+  }
+  else if (dmc_type == DMC_TYPE::disaggregated) {
     // check cache
-
+    for () {
+    }
     // get the inode that is not in the cache
   }
   if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
+  // Yield to other coroutines when waiting for network replies
+  coro_sched->Yield(yield, coro_id);
 
+  // Receive data
+  std::list<HashRead> pending_next_hash_ro;
+  // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check read
+  // ro";
+  auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
+                         pending_next_hash_ro, yield);
   //   check results
 
   return true;
@@ -48,10 +57,10 @@ bool DMC::create(string path, coro_yield_t& yield) {
     // check cache
     // get the inode
     // check permission
-    
+
     // FAA the entry list, insert new inode
 
-    // 
+    //
   }
   return true;
 }
@@ -62,7 +71,7 @@ bool DMC::rename(string old_path, string new_path, coro_yield_t& yield) {
 bool DMC::set_permission(string path, uint64_t permission,
                          coro_yield_t& yield) {
   // set permission , update mtime
-  
+
   return true;
 }
 bool DMC::read_dir(string path, coro_yield_t& yield) { return true; }

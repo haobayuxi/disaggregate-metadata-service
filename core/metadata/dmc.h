@@ -24,9 +24,7 @@
 #include "cache/version_status.h"
 #include "connection/meta_manager.h"
 #include "connection/qp_manager.h"
-#include "dtx/doorbell.h"
 #include "inode.h"
-// #include "dtx/structs.h"
 #include "memstore/hash_store.h"
 #include "util/debug.h"
 #include "util/hash.h"
@@ -71,6 +69,9 @@ class DMC {
   bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro);
 
+  void Begin();
+  void AddToReadOnlySet(DataItemPtr item);
+
  private:
   tx_id_t tx_id;  // Transaction ID
 
@@ -86,6 +87,16 @@ class DMC {
 
   AddrCache* addr_cache;
   DMC_TYPE dmc_type;
-  vector<uint64_t> inodes;
-  vector<uint64_t> to_read;
+  vector<DataSetItem> read_set;
 };
+
+ALWAYS_INLINE
+void DMC::Begin() {}
+
+ALWAYS_INLINE
+void DMC::AddToReadSet(DataItemPtr item) {
+  DataSetItem data_set_item {
+    .item_ptr = std::move(item), .is_fetched = false, .addr = 0;
+    read_set.emplace_back(data_set_item);
+  }
+}

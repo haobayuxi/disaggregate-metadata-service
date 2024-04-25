@@ -39,10 +39,7 @@ vector<uint64_t> path_resolution(string path) {
 struct DataSetItem {
   DataItemPtr item_ptr;
   bool is_fetched;
-  bool is_logged;
-  node_id_t read_which_node;  // From which node this data item is read. This is
-                              // a node id, e.g., 0, 1, 2...
-  int64_t bkt_idx;            // The bkt idx of local lock table
+  uint64_t addr;
 };
 
 struct OldVersionForInsert {
@@ -95,5 +92,5 @@ struct NameID {
 };
 
 vector<NameID> path_resolution(string path) {
-    
+
 }
