@@ -66,8 +66,12 @@ class DMC {
                    std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro,
                    coro_yield_t& yield);
+  // check ro
+  bool CheckDirectRO(std::vector<DirectRead>& pending_direct_ro,
+                     std::list<HashRead>& pending_next_hash_ro);
   bool CheckHashRO(std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro);
+  bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
 
   void Begin();
   void AddToReadOnlySet(DataItemPtr item);

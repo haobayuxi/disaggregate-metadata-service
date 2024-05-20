@@ -13,8 +13,15 @@ bool DMC::IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
     auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
     if (offset != NOT_FOUND) {
-      //   check the permission
-
+      it->remote_offset = offset;
+      char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+      pending_direct_ro.emplace_back(DirectRead{.qp = qp,
+                                                .item = &item,
+                                                .buf = data_buf,
+                                                .remote_node = remote_node_id});
+      if (!coro_sched->RDMARead(coro_id, qp, data_buf, offset, DataItemSize)) {
+        return false;
+      }
     } else {
       // Local cache does not have
       // miss_local_cache_times++;
@@ -94,8 +101,3 @@ bool DMC::IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
 //   }
 //   return true;
 // }
-
-
-
-
-
