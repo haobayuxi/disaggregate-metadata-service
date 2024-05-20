@@ -92,5 +92,5 @@ struct NameID {
 };
 
 vector<NameID> path_resolution(string path) {
-
+  
 }

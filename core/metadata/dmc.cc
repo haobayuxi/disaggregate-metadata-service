@@ -1,4 +1,7 @@
 #include "dmc.h"
+#include <vector>
+
+using namespace std;
 
 DMC::DMC(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
          t_id_t tid, coro_id_t coroid, CoroutineScheduler* sched,
@@ -15,12 +18,13 @@ DMC::DMC(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
   dmc_type = type;
 }
 
-// native
+
 bool DMC::open(string path, coro_yield_t& yield) {
   // You can read from primary or backup
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-  vector<> paths = if (dmc_type == DMC_TYPE::native) {
+  vector<NameID> paths = path_resolution(path);
+  if (dmc_type == DMC_TYPE::native) {
     // get all the inode
   }
   else if (dmc_type == DMC_TYPE::disaggregated) {
@@ -35,8 +39,6 @@ bool DMC::open(string path, coro_yield_t& yield) {
 
   // Receive data
   std::list<HashRead> pending_next_hash_ro;
-  // RDMA_LOG(DBG) << "coro: " << coro_id << " tx_id: " << tx_id << " check read
-  // ro";
   auto res = CheckReadRO(pending_direct_ro, pending_hash_ro,
                          pending_next_hash_ro, yield);
   //   check results
