@@ -1,8 +1,7 @@
 #include "dmc.h"
 
-bool DMC::IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
-                      std::vector<HashRead>& pending_hash_ro,
-                      coro_yield_t& yield) {
+bool DMC::IssueReader(std::vector<DirectRead>& pending_direct_ro,
+                      std::vector<HashRead>& pending_hash_ro) {
   for (auto& item : read_set) {
     if (item.is_fetched) continue;
     auto it = item.item_ptr;
@@ -42,6 +41,49 @@ bool DMC::IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
         return false;
       }
     }
+  }
+  return true;
+}
+
+bool DMC::IssueUpdater(std::vector<CasRead>& pending_cas_rw) {
+  for (size_t i = 0; i < updater_set.size(); i++) {
+    if (updater_set[i].is_fetched) continue;
+    auto it = updater_set[i].item_ptr;
+    auto remote_node_id = global_meta_man->GetPrimaryNodeID(it->table_id);
+    // read_write_set[i].read_which_node = remote_node_id;
+    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
+    char* cas_buf = thread_rdma_buffer_alloc->Alloc(sizeof(lock_t));
+    char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+    pending_cas_rw.emplace_back(CasRead{.qp = qp,
+                                        .item = &updater_set[i],
+                                        .cas_buf = cas_buf,
+                                        .data_buf = data_buf,
+                                        .primary_node_id = remote_node_id});
+  }
+  return true;
+}
+
+bool DMC::IssueUpdaterAndWriter() {}
+
+bool DMC::IssueWriter() {
+  for (auto& set_it : writer_set) {
+    char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
+
+    auto it = set_it.item_ptr;
+    // Maintain the version that user specified
+    if (!it->user_insert) {
+      it->version = tx_id;
+    }
+
+    // set lock
+    memcpy(data_buf, (char*)it.get(), DataItemSize);
+
+    // Commit primary
+    node_id_t node_id = global_meta_man->GetPrimaryNodeID(
+        it->table_id);  // Read-write data can only be read from primary
+    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(node_id);
+    pending_commit_write.push_back(
+        CommitWrite{.node_id = node_id, .lock_off = it->GetRemoteLockAddr()});
   }
   return true;
 }

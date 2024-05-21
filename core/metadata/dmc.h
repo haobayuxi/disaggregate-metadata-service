@@ -60,8 +60,13 @@ class DMC {
   bool rmdir(string path, coro_yield_t& yield);
 
  public:
-  bool IssueReadRO(std::vector<DirectRead>& pending_direct_ro,
-                   std::vector<HashRead>& pending_hash_ro, coro_yield_t& yield);
+  //  issue
+  bool IssueReader(std::vector<DirectRead>& pending_direct_ro,
+                   std::vector<HashRead>& pending_hash_ro);
+  bool IssueUpdater(std::vector<CasRead>& pending_cas_rw);
+  bool IssueUpdaterAndWriter(std::vector<CasRead>& pending_cas_rw);
+  bool IssueWriter(std::vector<CasRead>& pending_cas_rw);
+  //  check
   bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro,
                    std::list<HashRead>& pending_next_hash_ro,
@@ -91,7 +96,9 @@ class DMC {
 
   AddrCache* addr_cache;
   DMC_TYPE dmc_type;
-  vector<DataSetItem> read_set;
+  vector<DataSetItem> reader_set;
+  vector<DataSetItem> writer_set;
+  vector<DataSetItem> updater_set;
 };
 
 ALWAYS_INLINE
