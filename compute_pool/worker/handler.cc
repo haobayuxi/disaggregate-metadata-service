@@ -175,7 +175,7 @@ void Handler::OutputResult(std::string bench_name, std::string system_name) {
   of << system_name << " " << total_attemp_tp / 1000 << " " << total_tp / 1000
      << " " << avg_median << " " << avg_tail << std::endl;
 
-    of_detail << std::endl;
+  of_detail << std::endl;
   of_abort_rate << std::endl;
 
   of.close();
@@ -283,8 +283,7 @@ void Handler::GenThreadsForMICRO() {
     param_arr[i].thread_num_per_machine = thread_num_per_machine;
     param_arr[i].total_thread_num = thread_num_per_machine * machine_num;
     param_arr[i].bench_name = "micro";
-    thread_arr[i] =
-        std::thread(run_thread, &param_arr[i], nullptr, nullptr, nullptr);
+    thread_arr[i] = std::thread(run_thread, &param_arr[i]);
 
     /* Pin thread i to hardware thread */
     cpu_set_t cpuset;
