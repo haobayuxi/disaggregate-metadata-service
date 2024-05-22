@@ -23,5 +23,4 @@ struct thread_params {
   std::string bench_name;
 };
 
-void run_thread(thread_params* params, TATP* tatp_client,
-                SmallBank* smallbank_client, TPCC* tpcc_client);
+void run_thread(thread_params* params);

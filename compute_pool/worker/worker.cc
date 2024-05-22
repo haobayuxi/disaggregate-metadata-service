@@ -219,8 +219,7 @@ void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {
   delete dtx;
 }
 
-void run_thread(thread_params* params, TATP* tatp_cli, SmallBank* smallbank_cli,
-                TPCC* tpcc_cli) {
+void run_thread(thread_params* params) {
   auto bench_name = params->bench_name;
   std::string config_filepath = bench_name + "_config.json";
 
