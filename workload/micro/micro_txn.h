@@ -32,15 +32,3 @@ enum OP : int {
   f_chmod_chown = 14,
   f_mkdir = 15,
 };
-
-bool TxTestCachedAddr(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
-                      tx_id_t tx_id, DTX* dtx, bool is_skewed,
-                      uint64_t data_set_size, uint64_t num_keys_global,
-                      uint64_t write_ratio);
-bool TxLockContention(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
-                      tx_id_t tx_id, DTX* dtx, bool is_skewed,
-                      uint64_t data_set_size, uint64_t num_keys_global,
-                      uint64_t write_ratio);
-bool TxReadOnly(ZipfGen* zipf_gen, uint64_t* seed, coro_yield_t& yield,
-                tx_id_t tx_id, DTX* dtx, bool is_skewed, uint64_t data_set_size,
-                uint64_t num_keys_global, uint64_t write_ratio);

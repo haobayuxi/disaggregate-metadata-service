@@ -111,112 +111,114 @@ void RecordTpLat(double msr_sec) {
 }
 
 void RunMICRO(coro_yield_t& yield, coro_id_t coro_id) {
-  double total_msr_us = 0;
-  // Each coroutine has a dtx: Each coroutine is a coordinator
-  DTX* dtx = new DTX(meta_man, qp_man, status, lock_table, thread_gid, coro_id,
-                     coro_sched, rdma_buffer_allocator, log_offset_allocator,
-                     addr_cache);
-  struct timespec tx_start_time, tx_end_time;
-  bool tx_committed = false;
+  // double total_msr_us = 0;
+  // // Each coroutine has a dtx: Each coroutine is a coordinator
+  // DTX* dtx = new DTX(meta_man, qp_man, status, lock_table, thread_gid,
+  // coro_id,
+  //                    coro_sched, rdma_buffer_allocator, log_offset_allocator,
+  //                    addr_cache);
+  // struct timespec tx_start_time, tx_end_time;
+  // bool tx_committed = false;
 
-  // Running transactions
-  clock_gettime(CLOCK_REALTIME, &msr_start);
-  while (true) {
-    uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
-    stat_attempted_tx_total++;
-    clock_gettime(CLOCK_REALTIME, &tx_start_time);
-    tx_committed =
-        TxLockContention(zipf_gen, &seed, yield, iter, dtx, is_skewed,
-                         data_set_size, num_keys_global, write_ratio);
-    /********************************** Stat begin
-     * *****************************************/
-    // Stat after one transaction finishes
-    if (tx_committed) {
-      clock_gettime(CLOCK_REALTIME, &tx_end_time);
-      double tx_usec =
-          (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
-          (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
-      timer[stat_committed_tx_total++] = tx_usec;
-    }
-    if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
-      // A coroutine calculate the total execution time and exits
-      clock_gettime(CLOCK_REALTIME, &msr_end);
-      // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
-      // (double) (msr_end.tv_nsec - msr_start.tv_nsec) / 1000;
-      double msr_sec =
-          (msr_end.tv_sec - msr_start.tv_sec) +
-          (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
+  // // Running transactions
+  // clock_gettime(CLOCK_REALTIME, &msr_start);
+  // while (true) {
+  //   uint64_t iter = ++tx_id_generator;  // Global atomic transaction id
+  //   stat_attempted_tx_total++;
+  //   clock_gettime(CLOCK_REALTIME, &tx_start_time);
+  //   // tx_committed =
+  //   //     TxLockContention(zipf_gen, &seed, yield, iter, dtx, is_skewed,
+  //   //                      data_set_size, num_keys_global, write_ratio);
+  //   /********************************** Stat begin
+  //    * *****************************************/
+  //   // Stat after one transaction finishes
+  //   if (tx_committed) {
+  //     clock_gettime(CLOCK_REALTIME, &tx_end_time);
+  //     double tx_usec =
+  //         (tx_end_time.tv_sec - tx_start_time.tv_sec) * 1000000 +
+  //         (double)(tx_end_time.tv_nsec - tx_start_time.tv_nsec) / 1000;
+  //     timer[stat_committed_tx_total++] = tx_usec;
+  //   }
+  //   if (stat_attempted_tx_total >= ATTEMPTED_NUM) {
+  //     // A coroutine calculate the total execution time and exits
+  //     clock_gettime(CLOCK_REALTIME, &msr_end);
+  //     // double msr_usec = (msr_end.tv_sec - msr_start.tv_sec) * 1000000 +
+  //     // (double) (msr_end.tv_nsec - msr_start.tv_nsec) / 1000;
+  //     double msr_sec =
+  //         (msr_end.tv_sec - msr_start.tv_sec) +
+  //         (double)(msr_end.tv_nsec - msr_start.tv_nsec) / 1000000000;
 
-      total_msr_us = msr_sec * 1000000;
+  //     total_msr_us = msr_sec * 1000000;
 
-      double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
-      double tx_tput = (double)stat_committed_tx_total / msr_sec;
+  //     double attemp_tput = (double)stat_attempted_tx_total / msr_sec;
+  //     double tx_tput = (double)stat_committed_tx_total / msr_sec;
 
-      std::string thread_num_coro_num;
-      if (coro_num < 10) {
-        thread_num_coro_num =
-            std::to_string(thread_num) + "_0" + std::to_string(coro_num);
-      } else {
-        thread_num_coro_num =
-            std::to_string(thread_num) + "_" + std::to_string(coro_num);
-      }
-      std::string log_file_path =
-          "bench_results/MICRO/" + thread_num_coro_num + "/output.txt";
+  //     std::string thread_num_coro_num;
+  //     if (coro_num < 10) {
+  //       thread_num_coro_num =
+  //           std::to_string(thread_num) + "_0" + std::to_string(coro_num);
+  //     } else {
+  //       thread_num_coro_num =
+  //           std::to_string(thread_num) + "_" + std::to_string(coro_num);
+  //     }
+  //     std::string log_file_path =
+  //         "bench_results/MICRO/" + thread_num_coro_num + "/output.txt";
 
-      std::ofstream output_of;
-      output_of.open(log_file_path, std::ios::app);
+  //     std::ofstream output_of;
+  //     output_of.open(log_file_path, std::ios::app);
 
-      std::sort(timer, timer + stat_committed_tx_total);
-      double percentile_50 = timer[stat_committed_tx_total / 2];
-      double percentile_99 = timer[stat_committed_tx_total * 99 / 100];
-      mux.lock();
-      tid_vec.push_back(thread_gid);
-      attemp_tp_vec.push_back(attemp_tput);
-      tp_vec.push_back(tx_tput);
-      medianlat_vec.push_back(percentile_50);
-      taillat_vec.push_back(percentile_99);
-      mux.unlock();
-      output_of << tx_tput << " " << percentile_50 << " " << percentile_99
-                << std::endl;
-      output_of.close();
-      // std::cout << tx_tput << " " << percentile_50 << " " << percentile_99 <<
-      // std::endl;
+  //     std::sort(timer, timer + stat_committed_tx_total);
+  //     double percentile_50 = timer[stat_committed_tx_total / 2];
+  //     double percentile_99 = timer[stat_committed_tx_total * 99 / 100];
+  //     mux.lock();
+  //     tid_vec.push_back(thread_gid);
+  //     attemp_tp_vec.push_back(attemp_tput);
+  //     tp_vec.push_back(tx_tput);
+  //     medianlat_vec.push_back(percentile_50);
+  //     taillat_vec.push_back(percentile_99);
+  //     mux.unlock();
+  //     output_of << tx_tput << " " << percentile_50 << " " << percentile_99
+  //               << std::endl;
+  //     output_of.close();
+  //     // std::cout << tx_tput << " " << percentile_50 << " " << percentile_99
+  //     <<
+  //     // std::endl;
 
-      // Output the local addr cache miss rate
-      log_file_path =
-          "bench_results/MICRO/" + thread_num_coro_num + "/miss_rate.txt";
-      output_of.open(log_file_path, std::ios::app);
-      output_of << double(dtx->miss_local_cache_times) /
-                       (dtx->hit_local_cache_times +
-                        dtx->miss_local_cache_times)
-                << std::endl;
-      output_of.close();
+  //     // Output the local addr cache miss rate
+  //     log_file_path =
+  //         "bench_results/MICRO/" + thread_num_coro_num + "/miss_rate.txt";
+  //     output_of.open(log_file_path, std::ios::app);
+  //     output_of << double(dtx->miss_local_cache_times) /
+  //                      (dtx->hit_local_cache_times +
+  //                       dtx->miss_local_cache_times)
+  //               << std::endl;
+  //     output_of.close();
 
-      log_file_path =
-          "bench_results/MICRO/" + thread_num_coro_num + "/cache_size.txt";
-      output_of.open(log_file_path, std::ios::app);
-      output_of << dtx->GetAddrCacheSize() << std::endl;
-      output_of.close();
+  //     log_file_path =
+  //         "bench_results/MICRO/" + thread_num_coro_num + "/cache_size.txt";
+  //     output_of.open(log_file_path, std::ios::app);
+  //     output_of << dtx->GetAddrCacheSize() << std::endl;
+  //     output_of.close();
 
-      break;
-    }
-  }
+  //     break;
+  //   }
+  // }
 
-  std::string thread_num_coro_num;
-  if (coro_num < 10) {
-    thread_num_coro_num =
-        std::to_string(thread_num) + "_0" + std::to_string(coro_num);
-  } else {
-    thread_num_coro_num =
-        std::to_string(thread_num) + "_" + std::to_string(coro_num);
-  }
-  uint64_t total_duration = 0;
-  double average_lock_duration = 0;
+  // std::string thread_num_coro_num;
+  // if (coro_num < 10) {
+  //   thread_num_coro_num =
+  //       std::to_string(thread_num) + "_0" + std::to_string(coro_num);
+  // } else {
+  //   thread_num_coro_num =
+  //       std::to_string(thread_num) + "_" + std::to_string(coro_num);
+  // }
+  // uint64_t total_duration = 0;
+  // double average_lock_duration = 0;
 
-  /********************************** Stat end
-   * *****************************************/
+  // /********************************** Stat end
+  //  * *****************************************/
 
-  delete dtx;
+  // delete dtx;
 }
 
 void run_thread(thread_params* params) {
