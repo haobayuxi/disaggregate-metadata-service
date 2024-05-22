@@ -38,20 +38,6 @@ class Server {
 
   ~Server() {
     RDMA_LOG(INFO) << "Do server cleaning...";
-    if (tatp_server) {
-      delete tatp_server;
-      RDMA_LOG(INFO) << "delete tatp tables";
-    }
-
-    if (smallbank_server) {
-      delete smallbank_server;
-      RDMA_LOG(INFO) << "delete smallbank tables";
-    }
-
-    if (tpcc_server) {
-      delete tpcc_server;
-      RDMA_LOG(INFO) << "delete tpcc tables";
-    }
 
     if (micro_server) {
       delete micro_server;
@@ -127,13 +113,6 @@ class Server {
   char* hash_reserve_buffer;
 
   char* log_buffer;
-
-  // For server-side workload
-  TATP* tatp_server = nullptr;
-
-  SmallBank* smallbank_server = nullptr;
-
-  TPCC* tpcc_server = nullptr;
 
   MICRO* micro_server = nullptr;
 };
