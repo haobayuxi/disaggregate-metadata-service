@@ -15,9 +15,6 @@
 
 // Load DB
 #include "micro/micro_db.h"
-#include "smallbank/smallbank_db.h"
-#include "tatp/tatp_db.h"
-#include "tpcc/tpcc_db.h"
 
 using namespace rdmaio;
 
