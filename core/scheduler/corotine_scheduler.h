@@ -63,6 +63,8 @@ class CoroutineScheduler {
 
   bool RDMASend(coro_id_t coro_id, RCQP* qp, char* rd_data,
                 uint64_t remote_offset, size_t size);
+  bool RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
+                uint64_t remote_offset, size_t size);
 
   bool RDMACAS(coro_id_t coro_id, RCQP* qp, char* local_buf,
                uint64_t remote_offset, uint64_t compare, uint64_t swap);
@@ -230,6 +232,21 @@ bool CoroutineScheduler::RDMASend(coro_id_t coro_id, RCQP* qp, char* rd_data,
                     << ", coroid = " << coro_id;
     return false;
   }
+  AddPendingQP(coro_id, qp);
+  return true;
+}
+
+ALWAYS_INLINE
+bool CoroutineScheduler::RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
+                                  uint64_t remote_offset, size_t size) {
+  auto rc = qp->post_send(IBV_WR_SEND, rd_data, size, remote_offset,
+                          IBV_SEND_SIGNALED, coro_id);
+  if (rc != SUCC) {
+    RDMA_LOG(ERROR) << "client: post read fail. rc=" << rc << ", tid = " << t_id
+                    << ", coroid = " << coro_id;
+    return false;
+  }
+  // push an to 
   AddPendingQP(coro_id, qp);
   return true;
 }
