@@ -26,7 +26,7 @@ set(SCHEDULER_SRC
 
 add_library(ford STATIC
         ${CONNECTION_SRC}
-        ${DTX_SRC}
+        # ${DTX_SRC}
         ${SCHEDULER_SRC}
         )
 
