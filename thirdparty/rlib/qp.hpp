@@ -197,7 +197,7 @@ class RRCQP : public QP {
     ibv_recv_wr* bad_wr = nullptr;
     int ret = ibv_post_recv(qp_, &wr, &bad_wr);
     if (ret != 0) {
-      RDMA_LOG(ERROR) << "ibv_post_recv FAIL rc = " << rc << " "
+      RDMA_LOG(ERROR) << "ibv_post_recv FAIL rc = " << ret << " "
                       << strerror(errno);
     }
     return ret == 0 ? SUCC : ERR;
