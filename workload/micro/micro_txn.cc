@@ -8,7 +8,7 @@
 /******************** The business logic (Transaction) start
  * ********************/
 
-bool Trace0(uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx, ) {
+bool Trace0(uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DTX* dtx) {
   int op_ratio = FastRand(seed) % 100;
   //  if (op_ratio < write_ratio){
 
