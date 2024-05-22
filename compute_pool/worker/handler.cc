@@ -84,24 +84,6 @@ void Handler::GenThreads(std::string bench_name) {
 
   auto* param_arr = new struct thread_params[thread_num_per_machine];
 
-  TATP* tatp_client = nullptr;
-  SmallBank* smallbank_client = nullptr;
-  TPCC* tpcc_client = nullptr;
-
-  if (bench_name == "tatp") {
-    tatp_client = new TATP();
-    total_try_times.resize(TATP_TX_TYPES, 0);
-    total_commit_times.resize(TATP_TX_TYPES, 0);
-  } else if (bench_name == "smallbank") {
-    smallbank_client = new SmallBank();
-    total_try_times.resize(SmallBank_TX_TYPES, 0);
-    total_commit_times.resize(SmallBank_TX_TYPES, 0);
-  } else if (bench_name == "tpcc") {
-    tpcc_client = new TPCC();
-    total_try_times.resize(TPCC_TX_TYPES, 0);
-    total_commit_times.resize(TPCC_TX_TYPES, 0);
-  }
-
   RDMA_LOG(INFO) << "Spawn threads to execute...";
 
   for (t_id_t i = 0; i < thread_num_per_machine; i++) {
@@ -115,8 +97,7 @@ void Handler::GenThreads(std::string bench_name) {
     param_arr[i].global_rdma_region = global_rdma_region;
     param_arr[i].thread_num_per_machine = thread_num_per_machine;
     param_arr[i].total_thread_num = thread_num_per_machine * machine_num;
-    thread_arr[i] = std::thread(run_thread, &param_arr[i], tatp_client,
-                                smallbank_client, tpcc_client);
+    thread_arr[i] = std::thread(run_thread, &param_arr[i]);
 
     /* Pin thread i to hardware thread i */
     cpu_set_t cpuset;
@@ -142,9 +123,6 @@ void Handler::GenThreads(std::string bench_name) {
   delete global_meta_man;
   delete global_vcache;
   delete global_lcache;
-  if (tatp_client) delete tatp_client;
-  if (smallbank_client) delete smallbank_client;
-  if (tpcc_client) delete tpcc_client;
 }
 
 void Handler::OutputResult(std::string bench_name, std::string system_name) {
@@ -197,33 +175,7 @@ void Handler::OutputResult(std::string bench_name, std::string system_name) {
   of << system_name << " " << total_attemp_tp / 1000 << " " << total_tp / 1000
      << " " << avg_median << " " << avg_tail << std::endl;
 
-  if (bench_name == "tatp") {
-    for (int i = 0; i < TATP_TX_TYPES; i++) {
-      of_abort_rate << TATP_TX_NAME[i] << " " << total_try_times[i] << " "
-                    << total_commit_times[i] << " "
-                    << (double)(total_try_times[i] - total_commit_times[i]) /
-                           (double)total_try_times[i]
-                    << std::endl;
-    }
-  } else if (bench_name == "smallbank") {
-    for (int i = 0; i < SmallBank_TX_TYPES; i++) {
-      of_abort_rate << SmallBank_TX_NAME[i] << " " << total_try_times[i] << " "
-                    << total_commit_times[i] << " "
-                    << (double)(total_try_times[i] - total_commit_times[i]) /
-                           (double)total_try_times[i]
-                    << std::endl;
-    }
-  } else if (bench_name == "tpcc") {
-    for (int i = 0; i < TPCC_TX_TYPES; i++) {
-      of_abort_rate << TPCC_TX_NAME[i] << " " << total_try_times[i] << " "
-                    << total_commit_times[i] << " "
-                    << (double)(total_try_times[i] - total_commit_times[i]) /
-                           (double)total_try_times[i]
-                    << std::endl;
-    }
-  }
-
-  of_detail << std::endl;
+    of_detail << std::endl;
   of_abort_rate << std::endl;
 
   of.close();
