@@ -181,7 +181,7 @@ class RRCQP : public QP {
    */
   void bind_remote_mr(MemoryAttr attr) { remote_mr_ = attr; }
 
-  Connstatus postRecv(void* local_addr, uint32_t length, uint32_t lkey,
+  ConnStatus postRecv(void* local_addr, uint32_t length, uint32_t lkey,
                       uint64_t wr_id = 0) {
     ibv_sge sge{
         (uint64_t)local_addr,  // addr

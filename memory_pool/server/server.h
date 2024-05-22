@@ -15,15 +15,13 @@
 
 // Load DB
 #include "micro/micro_db.h"
-#include "smallbank/smallbank_db.h"
-#include "tatp/tatp_db.h"
-#include "tpcc/tpcc_db.h"
 
 using namespace rdmaio;
 
 class Server {
  public:
-  Server(int nid, int local_port, int local_meta_port, size_t hash_buf_size, size_t log_buf_size, int use_pm, std::string& pm_file, size_t pm_size)
+  Server(int nid, int local_port, int local_meta_port, size_t hash_buf_size,
+         size_t log_buf_size, int use_pm, std::string& pm_file, size_t pm_size)
       : server_node_id(nid),
         local_port(local_port),
         local_meta_port(local_meta_port),
@@ -80,11 +78,14 @@ class Server {
 
   void InitRDMA();
 
-  void LoadData(node_id_t machine_id, node_id_t machine_num, std::string& workload);
+  void LoadData(node_id_t machine_id, node_id_t machine_num,
+                std::string& workload);
 
-  void SendMeta(node_id_t machine_id, std::string& workload, size_t compute_node_num);
+  void SendMeta(node_id_t machine_id, std::string& workload,
+                size_t compute_node_num);
 
-  void PrepareHashMeta(node_id_t machine_id, std::string& workload, char** hash_meta_buffer, size_t& total_meta_size);
+  void PrepareHashMeta(node_id_t machine_id, std::string& workload,
+                       char** hash_meta_buffer, size_t& total_meta_size);
 
   void SendHashMeta(char* hash_meta_buffer, size_t& total_meta_size);
 
@@ -118,7 +119,8 @@ class Server {
   // The start address of the whole hash store space
   char* hash_buffer;
 
-  // The start address of the reserved space in hash store. For insertion in case of conflict in a full bucket
+  // The start address of the reserved space in hash store. For insertion in
+  // case of conflict in a full bucket
   char* hash_reserve_buffer;
 
   char* log_buffer;
@@ -129,6 +131,6 @@ class Server {
   SmallBank* smallbank_server = nullptr;
 
   TPCC* tpcc_server = nullptr;
-  
+
   MICRO* micro_server = nullptr;
 };
