@@ -72,19 +72,7 @@ void Server::LoadData(node_id_t machine_id,
                                            hash_reserve_buffer);
   MemStoreReserveParam mem_store_reserve_param(hash_reserve_buffer, 0,
                                                hash_buffer + hash_buf_size);
-  if (workload == "TATP") {
-    tatp_server = new TATP();
-    tatp_server->LoadTable(machine_id, machine_num, &mem_store_alloc_param,
-                           &mem_store_reserve_param);
-  } else if (workload == "SmallBank") {
-    smallbank_server = new SmallBank();
-    smallbank_server->LoadTable(machine_id, machine_num, &mem_store_alloc_param,
-                                &mem_store_reserve_param);
-  } else if (workload == "TPCC") {
-    tpcc_server = new TPCC();
-    tpcc_server->LoadTable(machine_id, machine_num, &mem_store_alloc_param,
-                           &mem_store_reserve_param);
-  } else if (workload == "MICRO") {
+  if (workload == "MICRO") {
     micro_server = new MICRO();
     micro_server->LoadTable(machine_id, machine_num, &mem_store_alloc_param,
                             &mem_store_reserve_param);
@@ -92,22 +80,7 @@ void Server::LoadData(node_id_t machine_id,
   RDMA_LOG(INFO) << "Loading table successfully!";
 }
 
-void Server::CleanTable() {
-  if (tatp_server) {
-    delete tatp_server;
-    RDMA_LOG(INFO) << "delete tatp tables";
-  }
-
-  if (smallbank_server) {
-    delete smallbank_server;
-    RDMA_LOG(INFO) << "delete smallbank tables";
-  }
-
-  if (tpcc_server) {
-    delete tpcc_server;
-    RDMA_LOG(INFO) << "delete tpcc tables";
-  }
-}
+void Server::CleanTable() {}
 
 void Server::CleanQP() { rdma_ctrl->destroy_rc_qp(); }
 
@@ -135,16 +108,7 @@ void Server::PrepareHashMeta(node_id_t machine_id, std::string& workload,
   std::vector<HashStore*> all_priamry_tables;
   std::vector<HashStore*> all_backup_tables;
 
-  if (workload == "TATP") {
-    all_priamry_tables = tatp_server->GetPrimaryHashStore();
-    all_backup_tables = tatp_server->GetBackupHashStore();
-  } else if (workload == "SmallBank") {
-    all_priamry_tables = smallbank_server->GetPrimaryHashStore();
-    all_backup_tables = smallbank_server->GetBackupHashStore();
-  } else if (workload == "TPCC") {
-    all_priamry_tables = tpcc_server->GetPrimaryHashStore();
-    all_backup_tables = tpcc_server->GetBackupHashStore();
-  } else if (workload == "MICRO") {
+  if (workload == "MICRO") {
     all_priamry_tables = micro_server->GetPrimaryHashStore();
     all_backup_tables = micro_server->GetBackupHashStore();
   }

@@ -196,11 +196,11 @@ class RRCQP : public QP {
     };
     ibv_recv_wr* bad_wr = nullptr;
     int ret = ibv_post_recv(qp_, &wr, &bad_wr);
-    if (rc != 0) {
+    if (ret != 0) {
       RDMA_LOG(ERROR) << "ibv_post_recv FAIL rc = " << rc << " "
                       << strerror(errno);
     }
-    return rc == 0 ? SUCC : ERR;
+    return ret == 0 ? SUCC : ERR;
   }
 
   ConnStatus post_send_to_mr(MemoryAttr& local_mr, MemoryAttr& remote_mr,
