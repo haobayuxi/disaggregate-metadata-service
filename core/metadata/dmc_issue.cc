@@ -2,7 +2,7 @@
 
 bool DMC::IssueReader(std::vector<DirectRead>& pending_direct_ro,
                       std::vector<HashRead>& pending_hash_ro) {
-  for (auto& item : read_set) {
+  for (auto& item : reader_set) {
     if (item.is_fetched) continue;
     auto it = item.item_ptr;
 

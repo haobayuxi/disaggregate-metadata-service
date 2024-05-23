@@ -15,7 +15,7 @@ using namespace rdmaio;
 class CoroutineScheduler {
  public:
   // The coro_num includes all the coroutines
-  CoroutineScheduler(t_id_t thread_id, coro_id_t coro_num) {
+  CoroutineScheduler(t_id_t thread_id, coro_id_t coro_num, bool rpc_ = false) {
     t_id = thread_id;
     pending_counts = new int[coro_num];
     pending_log_counts = new int[coro_num];
@@ -24,6 +24,7 @@ class CoroutineScheduler {
       pending_log_counts[c] = 0;
     }
     coro_array = new Coroutine[coro_num];
+    rpc = rpc_;
   }
   ~CoroutineScheduler() {
     if (pending_counts) delete[] pending_counts;
@@ -63,8 +64,8 @@ class CoroutineScheduler {
 
   bool RDMASend(coro_id_t coro_id, RCQP* qp, char* rd_data,
                 uint64_t remote_offset, size_t size);
-  bool RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
-                uint64_t remote_offset, size_t size);
+  bool RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data, char* result,
+               uint64_t remote_offset, size_t size);
 
   bool RDMACAS(coro_id_t coro_id, RCQP* qp, char* local_buf,
                uint64_t remote_offset, uint64_t compare, uint64_t swap);
@@ -100,6 +101,7 @@ class CoroutineScheduler {
 
  private:
   t_id_t t_id;
+  bool rpc;
 
   std::list<RCQP*> pending_qps;
 
@@ -238,7 +240,8 @@ bool CoroutineScheduler::RDMASend(coro_id_t coro_id, RCQP* qp, char* rd_data,
 
 ALWAYS_INLINE
 bool CoroutineScheduler::RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
-                                  uint64_t remote_offset, size_t size) {
+                                 char* result uint64_t remote_offset,
+                                 size_t size) {
   auto rc = qp->post_send(IBV_WR_SEND, rd_data, size, remote_offset,
                           IBV_SEND_SIGNALED, coro_id);
   if (rc != SUCC) {
@@ -246,7 +249,8 @@ bool CoroutineScheduler::RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
                     << ", coroid = " << coro_id;
     return false;
   }
-  // push an to 
+  // push
+  
   AddPendingQP(coro_id, qp);
   return true;
 }

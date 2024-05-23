@@ -66,7 +66,7 @@ void CoroutineScheduler::PollLogCompletion() {
 
 void CoroutineScheduler::PollCompletion() {
   PollRegularCompletion();
-  PollLogCompletion();
+  // PollLogCompletion();
 }
 
 bool CoroutineScheduler::CheckLogAck(coro_id_t c_id) {
