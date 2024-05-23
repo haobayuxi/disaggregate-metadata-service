@@ -24,6 +24,8 @@
 #include "cache/version_status.h"
 #include "connection/meta_manager.h"
 #include "connection/qp_manager.h"
+#include "corotine_scheduler.h"
+#include "coroutine.h"
 #include "inode.h"
 #include "memstore/hash_store.h"
 #include "util/debug.h"
