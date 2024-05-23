@@ -5,7 +5,6 @@
 
 #include <memory>
 
-#include "dtx/dtx.h"
 #include "micro/micro_db.h"
 #include "util/zipf.h"
 
