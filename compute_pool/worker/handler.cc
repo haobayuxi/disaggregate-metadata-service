@@ -73,8 +73,6 @@ void Handler::GenThreads(std::string bench_name) {
   auto thread_arr = new std::thread[thread_num_per_machine];
 
   auto* global_meta_man = new MetaManager();
-  auto* global_vcache = new VersionCache();
-  auto* global_lcache = new LockCache();
   RDMA_LOG(INFO) << "Alloc local memory: "
                  << (size_t)(thread_num_per_machine * PER_THREAD_ALLOC_SIZE) /
                         (1024 * 1024)
@@ -92,8 +90,6 @@ void Handler::GenThreads(std::string bench_name) {
     param_arr[i].coro_num = coro_num;
     param_arr[i].bench_name = bench_name;
     param_arr[i].global_meta_man = global_meta_man;
-    param_arr[i].global_status = global_vcache;
-    param_arr[i].global_lcache = global_lcache;
     param_arr[i].global_rdma_region = global_rdma_region;
     param_arr[i].thread_num_per_machine = thread_num_per_machine;
     param_arr[i].total_thread_num = thread_num_per_machine * machine_num;
@@ -121,8 +117,6 @@ void Handler::GenThreads(std::string bench_name) {
   delete[] param_arr;
   delete global_rdma_region;
   delete global_meta_man;
-  delete global_vcache;
-  delete global_lcache;
 }
 
 void Handler::OutputResult(std::string bench_name, std::string system_name) {
@@ -260,8 +254,6 @@ void Handler::GenThreadsForMICRO() {
   connected_t_num = 0;  // Sync all threads' RDMA QP connections
   auto thread_arr = new std::thread[thread_num_per_machine];
   auto* global_meta_man = new MetaManager();
-  auto* global_vcache = new VersionCache();
-  auto* global_lcache = new LockCache();
   RDMA_LOG(INFO) << "Alloc local memory: "
                  << (size_t)(thread_num_per_machine * PER_THREAD_ALLOC_SIZE) /
                         (1024 * 1024)
@@ -277,8 +269,6 @@ void Handler::GenThreadsForMICRO() {
     param_arr[i].thread_global_id = (machine_id * thread_num_per_machine) + i;
     param_arr[i].coro_num = coro_num;
     param_arr[i].global_meta_man = global_meta_man;
-    param_arr[i].global_status = global_vcache;
-    param_arr[i].global_lcache = global_lcache;
     param_arr[i].global_rdma_region = global_rdma_region;
     param_arr[i].thread_num_per_machine = thread_num_per_machine;
     param_arr[i].total_thread_num = thread_num_per_machine * machine_num;
@@ -303,6 +293,4 @@ void Handler::GenThreadsForMICRO() {
   delete[] param_arr;
   delete global_rdma_region;
   delete global_meta_man;
-  delete global_vcache;
-  delete global_lcache;
 }
