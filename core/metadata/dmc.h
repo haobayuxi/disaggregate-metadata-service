@@ -117,7 +117,7 @@ void DMC::AddToReadOnlySet(DataItemPtr item) {
 // uint64_t get_time_offset(uint64_t addr) { return addr + sizeof(uint64_t); }
 
 // uint64_t get_permission_offset(uint64_t addr) { return addr; }
-
+ALWAYS_INLINE
 int64_t DMC::compute_hash(string const& s) {
   const int p = 31;
   const int m = 1e9 + 9;
