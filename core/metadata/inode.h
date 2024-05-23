@@ -30,6 +30,11 @@ uint64_t compute_hash(string const& s) {
   return hash_value;
 }
 
+struct NameID {
+  uint64_t id;
+  string name;
+};
+
 vector<uint64_t> path_resolution(string path) {
   vector<uint64_t> path_ids;
 
@@ -40,6 +45,7 @@ struct DataSetItem {
   DataItemPtr item_ptr;
   bool is_fetched;
   uint64_t addr;
+  int read_which_node;
 };
 
 struct OldVersionForInsert {
@@ -85,13 +91,3 @@ struct InsertOffRead {
   const HashMeta meta;
   offset_t node_off;
 };
-
-struct NameID {
-  uint64_t id;
-  string name;
-};
-
-vector<NameID> path_resolution(string path) {
-  vector<NameID> a;
-  return a;
-}

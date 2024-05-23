@@ -40,9 +40,9 @@ uint32_t get_inode_crc(struct Inode* inode) {
 
 class DMC {
  public:
-  DMC(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
-      t_id_t tid, coro_id_t coroid, CoroutineScheduler* sched,
-      RDMABufferAllocator* rdma_buffer_allocator, AddrCache* addr_buf);
+  DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
+      CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
+      AddrCache* addr_buf);
   MetaManager* global_meta_man;  // Global metadata manager
                                  // native
   bool open(string path, coro_yield_t& yield);
@@ -107,6 +107,7 @@ void DMC::AddToReadOnlySet(DataItemPtr item) {
   DataSetItem data_set_item{
       .item_ptr = std::move(item),
       .is_fetched = false,
+      .read_which_node = -1,
   };
   reader_set.emplace_back(data_set_item);
 }

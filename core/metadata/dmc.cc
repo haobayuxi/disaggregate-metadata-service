@@ -4,10 +4,9 @@
 
 using namespace std;
 
-DMC::DMC(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
-         t_id_t tid, coro_id_t coroid, CoroutineScheduler* sched,
-         RDMABufferAllocator* rdma_buffer_allocator, AddrCache* addr_buf,
-         DMC_TYPE type) {
+DMC::DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
+         CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
+         AddrCache* addr_buf, DMC_TYPE type) {
   t_id = tid;
   coro_id = coroid;
   coro_sched = sched;
