@@ -43,3 +43,4 @@ add_library(ford STATIC
 set_target_properties(ford PROPERTIES LINKER_LANGUAGE CXX)
 
 target_link_libraries(ford rlib pthread boost_coroutine boost_context boost_system)
+
