@@ -1,9 +1,10 @@
 // Author: Ming Zhang
 // Copyright (c) 2022
 
-#include "dtx/doorbell.h"
+#include "doorbell.h"
 
-void LockReadBatch::SetLockReq(char* local_addr, uint64_t remote_off, uint64_t compare, uint64_t swap) {
+void LockReadBatch::SetLockReq(char* local_addr, uint64_t remote_off,
+                               uint64_t compare, uint64_t swap) {
   sr[0].opcode = IBV_WR_ATOMIC_CMP_AND_SWP;
   sr[0].wr.atomic.remote_addr = remote_off;
   sr[0].wr.atomic.compare_add = compare;
@@ -12,14 +13,16 @@ void LockReadBatch::SetLockReq(char* local_addr, uint64_t remote_off, uint64_t c
   sge[0].addr = (uint64_t)local_addr;
 }
 
-void LockReadBatch::SetReadReq(char* local_addr, uint64_t remote_off, size_t size) {
+void LockReadBatch::SetReadReq(char* local_addr, uint64_t remote_off,
+                               size_t size) {
   sr[1].opcode = IBV_WR_RDMA_READ;
   sr[1].wr.rdma.remote_addr = remote_off;
   sge[1].addr = (uint64_t)local_addr;
   sge[1].length = size;
 }
 
-bool LockReadBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id) {
+bool LockReadBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp,
+                             coro_id_t coro_id) {
   // sr[0] must be an atomic operation
   sr[0].wr.atomic.remote_addr += qp->remote_mr_.buf;
   sr[0].wr.atomic.rkey = qp->remote_mr_.key;
@@ -44,7 +47,8 @@ bool LockReadBatch::FillParams(RCQP* qp) {
   sge[1].lkey = qp->local_mr_.key;
 }
 
-void WriteUnlockBatch::SetWritePrimaryReq(char* local_addr, uint64_t remote_off, size_t size) {
+void WriteUnlockBatch::SetWritePrimaryReq(char* local_addr, uint64_t remote_off,
+                                          size_t size) {
   sr[0].opcode = IBV_WR_RDMA_WRITE;
   sr[0].wr.rdma.remote_addr = remote_off;
   sge[0].addr = (uint64_t)local_addr;
@@ -62,7 +66,8 @@ void WriteUnlockBatch::SetUnLockReq(char* local_addr, uint64_t remote_off) {
   sge[1].length = sizeof(uint64_t);
 }
 
-void WriteUnlockBatch::SetUnLockReq(char* local_addr, uint64_t remote_off, uint64_t compare, uint64_t swap) {
+void WriteUnlockBatch::SetUnLockReq(char* local_addr, uint64_t remote_off,
+                                    uint64_t compare, uint64_t swap) {
   sr[1].opcode = IBV_WR_ATOMIC_CMP_AND_SWP;
   sr[1].wr.atomic.remote_addr = remote_off;
   sr[1].wr.atomic.compare_add = compare;
@@ -71,7 +76,8 @@ void WriteUnlockBatch::SetUnLockReq(char* local_addr, uint64_t remote_off, uint6
   sge[1].addr = (uint64_t)local_addr;
 }
 
-bool WriteUnlockBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id, int use_cas) {
+bool WriteUnlockBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp,
+                                coro_id_t coro_id, int use_cas) {
   sr[0].wr.rdma.remote_addr += qp->remote_mr_.buf;
   sr[0].wr.rdma.rkey = qp->remote_mr_.key;
   sge[0].lkey = qp->local_mr_.key;
@@ -90,7 +96,8 @@ bool WriteUnlockBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_i
   return true;
 }
 
-void InvisibleWriteBatch::SetInvisibleReq(char* local_addr, uint64_t remote_off, uint64_t compare, uint64_t swap) {
+void InvisibleWriteBatch::SetInvisibleReq(char* local_addr, uint64_t remote_off,
+                                          uint64_t compare, uint64_t swap) {
   sr[0].opcode = IBV_WR_ATOMIC_CMP_AND_SWP;
   sr[0].wr.atomic.remote_addr = remote_off;
   sr[0].wr.atomic.compare_add = compare;
@@ -99,7 +106,8 @@ void InvisibleWriteBatch::SetInvisibleReq(char* local_addr, uint64_t remote_off,
   sge[0].addr = (uint64_t)local_addr;
 }
 
-void InvisibleWriteBatch::SetInvisibleReq(char* local_addr, uint64_t remote_off) {
+void InvisibleWriteBatch::SetInvisibleReq(char* local_addr,
+                                          uint64_t remote_off) {
   sr[0].opcode = IBV_WR_RDMA_WRITE;
   sr[0].send_flags |= IBV_SEND_INLINE;
   sr[0].wr.rdma.remote_addr = remote_off;
@@ -107,7 +115,8 @@ void InvisibleWriteBatch::SetInvisibleReq(char* local_addr, uint64_t remote_off)
   sge[0].length = sizeof(uint64_t);
 }
 
-void InvisibleWriteBatch::SetWriteRemoteReq(char* local_addr, uint64_t remote_off, size_t size) {
+void InvisibleWriteBatch::SetWriteRemoteReq(char* local_addr,
+                                            uint64_t remote_off, size_t size) {
   sr[1].opcode = IBV_WR_RDMA_WRITE;
   sr[1].wr.rdma.remote_addr = remote_off;
   sge[1].addr = (uint64_t)local_addr;
@@ -117,7 +126,8 @@ void InvisibleWriteBatch::SetWriteRemoteReq(char* local_addr, uint64_t remote_of
   }
 }
 
-bool InvisibleWriteBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id, int use_cas) {
+bool InvisibleWriteBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp,
+                                   coro_id_t coro_id, int use_cas) {
   if (use_cas) {
     // sr[0] must be an atomic operation
     sr[0].wr.atomic.remote_addr += qp->remote_mr_.buf;
@@ -136,7 +146,8 @@ bool InvisibleWriteBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, cor
   return true;
 }
 
-bool InvisibleWriteBatch::SendReqsSync(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id, int use_cas) {
+bool InvisibleWriteBatch::SendReqsSync(CoroutineScheduler* coro_sched, RCQP* qp,
+                                       coro_id_t coro_id, int use_cas) {
   if (use_cas) {
     // sr[0] must be an atomic operation
     sr[0].wr.atomic.remote_addr += qp->remote_mr_.buf;
@@ -151,11 +162,13 @@ bool InvisibleWriteBatch::SendReqsSync(CoroutineScheduler* coro_sched, RCQP* qp,
   sr[1].wr.rdma.rkey = qp->remote_mr_.key;
   sge[1].lkey = qp->local_mr_.key;
 
-  if (!coro_sched->RDMABatchSync(coro_id, qp, &(sr[0]), &bad_sr, 1)) return false;
+  if (!coro_sched->RDMABatchSync(coro_id, qp, &(sr[0]), &bad_sr, 1))
+    return false;
   return true;
 }
 
-void WriteFlushBatch::SetWriteRemoteReq(char* local_addr, uint64_t remote_off, size_t size) {
+void WriteFlushBatch::SetWriteRemoteReq(char* local_addr, uint64_t remote_off,
+                                        size_t size) {
   sr[0].opcode = IBV_WR_RDMA_WRITE;
   sr[0].wr.rdma.remote_addr = remote_off;
   sge[0].addr = (uint64_t)local_addr;
@@ -165,14 +178,16 @@ void WriteFlushBatch::SetWriteRemoteReq(char* local_addr, uint64_t remote_off, s
   }
 }
 
-void WriteFlushBatch::SetReadRemoteReq(char* local_addr, uint64_t remote_off, size_t size) {
+void WriteFlushBatch::SetReadRemoteReq(char* local_addr, uint64_t remote_off,
+                                       size_t size) {
   sr[1].opcode = IBV_WR_RDMA_READ;
   sr[1].wr.rdma.remote_addr = remote_off;
   sge[1].addr = (uint64_t)local_addr;
   sge[1].length = size;
 }
 
-bool WriteFlushBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id, MemoryAttr& remote_mr) {
+bool WriteFlushBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp,
+                               coro_id_t coro_id, MemoryAttr& remote_mr) {
   sr[0].wr.rdma.remote_addr += remote_mr.buf;
   sr[0].wr.rdma.rkey = remote_mr.key;
   sge[0].lkey = qp->local_mr_.key;
@@ -185,7 +200,8 @@ bool WriteFlushBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id
   return true;
 }
 
-void InvisibleWriteFlushBatch::SetInvisibleReq(char* local_addr, uint64_t remote_off) {
+void InvisibleWriteFlushBatch::SetInvisibleReq(char* local_addr,
+                                               uint64_t remote_off) {
   // Set invisible in a write way
   sr[0].opcode = IBV_WR_RDMA_WRITE;
   sr[0].send_flags |= IBV_SEND_INLINE;
@@ -194,7 +210,9 @@ void InvisibleWriteFlushBatch::SetInvisibleReq(char* local_addr, uint64_t remote
   sge[0].length = sizeof(uint64_t);
 }
 
-void InvisibleWriteFlushBatch::SetWriteRemoteReq(char* local_addr, uint64_t remote_off, size_t size) {
+void InvisibleWriteFlushBatch::SetWriteRemoteReq(char* local_addr,
+                                                 uint64_t remote_off,
+                                                 size_t size) {
   sr[1].opcode = IBV_WR_RDMA_WRITE;
   sr[1].wr.rdma.remote_addr = remote_off;
   sge[1].addr = (uint64_t)local_addr;
@@ -204,14 +222,18 @@ void InvisibleWriteFlushBatch::SetWriteRemoteReq(char* local_addr, uint64_t remo
   }
 }
 
-void InvisibleWriteFlushBatch::SetReadRemoteReq(char* local_addr, uint64_t remote_off, size_t size) {
+void InvisibleWriteFlushBatch::SetReadRemoteReq(char* local_addr,
+                                                uint64_t remote_off,
+                                                size_t size) {
   sr[2].opcode = IBV_WR_RDMA_READ;
   sr[2].wr.rdma.remote_addr = remote_off;
   sge[2].addr = (uint64_t)local_addr;
   sge[2].length = size;
 }
 
-bool InvisibleWriteFlushBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id, int use_cas) {
+bool InvisibleWriteFlushBatch::SendReqs(CoroutineScheduler* coro_sched,
+                                        RCQP* qp, coro_id_t coro_id,
+                                        int use_cas) {
   if (use_cas) {
     // sr[0] must be an atomic operation
     sr[0].wr.atomic.remote_addr += qp->remote_mr_.buf;
@@ -234,7 +256,8 @@ bool InvisibleWriteFlushBatch::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp
   return true;
 }
 
-void ComparatorUpdateRemote::SetInvisibleReq(char* local_addr, uint64_t remote_off) {
+void ComparatorUpdateRemote::SetInvisibleReq(char* local_addr,
+                                             uint64_t remote_off) {
   // Set invisible in a write way
   sr[0].opcode = IBV_WR_RDMA_WRITE;
   sr[0].send_flags |= IBV_SEND_INLINE;
@@ -243,7 +266,9 @@ void ComparatorUpdateRemote::SetInvisibleReq(char* local_addr, uint64_t remote_o
   sge[0].length = sizeof(uint64_t);
 }
 
-void ComparatorUpdateRemote::SetWriteRemoteReq(char* local_addr, uint64_t remote_off, size_t size) {
+void ComparatorUpdateRemote::SetWriteRemoteReq(char* local_addr,
+                                               uint64_t remote_off,
+                                               size_t size) {
   sr[1].opcode = IBV_WR_RDMA_WRITE;
   sr[1].wr.rdma.remote_addr = remote_off;
   sge[1].addr = (uint64_t)local_addr;
@@ -253,7 +278,8 @@ void ComparatorUpdateRemote::SetWriteRemoteReq(char* local_addr, uint64_t remote
   }
 }
 
-void ComparatorUpdateRemote::SetReleaseReq(char* local_addr, uint64_t remote_off) {
+void ComparatorUpdateRemote::SetReleaseReq(char* local_addr,
+                                           uint64_t remote_off) {
   sr[2].opcode = IBV_WR_RDMA_WRITE;
   sr[2].send_flags |= IBV_SEND_INLINE;
   sr[2].wr.rdma.remote_addr = remote_off;
@@ -261,7 +287,8 @@ void ComparatorUpdateRemote::SetReleaseReq(char* local_addr, uint64_t remote_off
   sge[2].length = sizeof(uint64_t);
 }
 
-bool ComparatorUpdateRemote::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp, coro_id_t coro_id, int use_cas) {
+bool ComparatorUpdateRemote::SendReqs(CoroutineScheduler* coro_sched, RCQP* qp,
+                                      coro_id_t coro_id, int use_cas) {
   if (use_cas) {
     // sr[0] must be an atomic operation
     sr[0].wr.atomic.remote_addr += qp->remote_mr_.buf;
