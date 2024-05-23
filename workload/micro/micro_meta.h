@@ -5,7 +5,6 @@
 
 #include <memory>
 
-#include "metadata/dmc.h"
 #include "micro/micro_db.h"
 #include "util/zipf.h"
 /******************** The business logic (Transaction) start
