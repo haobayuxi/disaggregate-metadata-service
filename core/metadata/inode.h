@@ -1,4 +1,4 @@
-#ifdef INODE_H
+#ifndef INODE_H
 #define INODE_H
 
 #include <stdint.h>
