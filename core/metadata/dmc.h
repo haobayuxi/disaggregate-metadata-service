@@ -1,4 +1,5 @@
-
+#ifndef TKDATABASE_SERVER_H
+#define TKDATABASE_SERVER_H
 #pragma once
 
 #include <time.h>
@@ -111,3 +112,5 @@ void DMC::AddToReadOnlySet(DataItemPtr item) {
   };
   reader_set.emplace_back(data_set_item);
 }
+
+#endif
