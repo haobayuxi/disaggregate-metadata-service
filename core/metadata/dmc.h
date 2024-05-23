@@ -65,8 +65,6 @@ class DMC {
   bool IssueReader(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro);
   bool IssueUpdater(std::vector<CasRead>& pending_cas_rw);
-  bool IssueUpdaterAndWriter(std::vector<CasRead>& pending_cas_rw);
-  bool IssueWriter(std::vector<CasRead>& pending_cas_rw);
   //  check
   bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro,
@@ -106,7 +104,7 @@ ALWAYS_INLINE
 void DMC::Begin() {}
 
 ALWAYS_INLINE
-void DMC::AddToReadSet(DataItemPtr item) {
+void DMC::AddToReadOnlySet(DataItemPtr item) {
   DataSetItem data_set_item {
     .item_ptr = std::move(item), .is_fetched = false, .addr = 0;
     read_set.emplace_back(data_set_item);

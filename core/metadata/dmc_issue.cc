@@ -63,31 +63,6 @@ bool DMC::IssueUpdater(std::vector<CasRead>& pending_cas_rw) {
   return true;
 }
 
-bool DMC::IssueUpdaterAndWriter() {}
-
-bool DMC::IssueWriter() {
-  for (auto& set_it : writer_set) {
-    char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);
-
-    auto it = set_it.item_ptr;
-    // Maintain the version that user specified
-    if (!it->user_insert) {
-      it->version = tx_id;
-    }
-
-    // set lock
-    memcpy(data_buf, (char*)it.get(), DataItemSize);
-
-    // Commit primary
-    node_id_t node_id = global_meta_man->GetPrimaryNodeID(
-        it->table_id);  // Read-write data can only be read from primary
-    RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(node_id);
-    pending_commit_write.push_back(
-        CommitWrite{.node_id = node_id, .lock_off = it->GetRemoteLockAddr()});
-  }
-  return true;
-}
-
 // bool DTX::IssueReadLock(std::vector<CasRead>& pending_cas_rw,
 //                         std::vector<HashRead>& pending_hash_rw,
 //                         std::vector<InsertOffRead>& pending_insert_off_rw) {
