@@ -240,7 +240,7 @@ bool CoroutineScheduler::RDMASend(coro_id_t coro_id, RCQP* qp, char* rd_data,
 
 ALWAYS_INLINE
 bool CoroutineScheduler::RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
-                                 char* result uint64_t remote_offset,
+                                 char* result, uint64_t remote_offset,
                                  size_t size) {
   auto rc = qp->post_send(IBV_WR_SEND, rd_data, size, remote_offset,
                           IBV_SEND_SIGNALED, coro_id);
@@ -250,7 +250,7 @@ bool CoroutineScheduler::RDMARPC(coro_id_t coro_id, RCQP* qp, char* rd_data,
     return false;
   }
   // push
-  
+
   AddPendingQP(coro_id, qp);
   return true;
 }
