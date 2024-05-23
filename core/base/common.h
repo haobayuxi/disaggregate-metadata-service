@@ -9,6 +9,8 @@
 
 #include "flags.h"
 
+using namespace std;
+
 // Global specification
 using tx_id_t = uint64_t;     // Transaction id type
 using t_id_t = uint32_t;      // Thread id type
