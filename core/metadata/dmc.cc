@@ -1,4 +1,5 @@
 #include "dmc.h"
+
 #include <vector>
 
 using namespace std;
@@ -18,7 +19,6 @@ DMC::DMC(MetaManager* meta_man, QPManager* qp_man, VersionCache* status,
   dmc_type = type;
 }
 
-
 bool DMC::open(string path, coro_yield_t& yield) {
   // You can read from primary or backup
   std::vector<DirectRead> pending_direct_ro;
@@ -26,14 +26,13 @@ bool DMC::open(string path, coro_yield_t& yield) {
   vector<NameID> paths = path_resolution(path);
   if (dmc_type == DMC_TYPE::native) {
     // get all the inode
-  }
-  else if (dmc_type == DMC_TYPE::disaggregated) {
+  } else if (dmc_type == DMC_TYPE::disaggregated) {
     // check cache
-    for () {
-    }
+    // for () {
+    // }
     // get the inode that is not in the cache
   }
-  if (!IssueReadRO(pending_direct_ro, pending_hash_ro)) return false;
+  if (!IssueReader(pending_direct_ro, pending_hash_ro)) return false;
   // Yield to other coroutines when waiting for network replies
   coro_sched->Yield(yield, coro_id);
 
