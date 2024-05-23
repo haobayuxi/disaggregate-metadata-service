@@ -35,9 +35,9 @@ enum DMC_TYPE : int {
   disaggregated = 1,
 };
 
-uint32_t get_inode_crc(struct Inode* inode) {
-  return CRC::Calculate(inode, inode_size - 16, CRC::CRC_32());
-}
+// uint32_t get_inode_crc(struct Inode* inode) {
+//   return CRC::Calculate(inode, inode_size - 16, CRC::CRC_32());
+// }
 
 class DMC {
  public:
