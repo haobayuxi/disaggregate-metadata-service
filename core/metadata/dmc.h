@@ -80,6 +80,10 @@ class DMC {
   void Begin();
   void AddToReadOnlySet(DataItemPtr item);
 
+  vector<DataSetItem> reader_set;
+  vector<DataSetItem> writer_set;
+  vector<DataSetItem> updater_set;
+
  private:
   tx_id_t tx_id;  // Transaction ID
 
@@ -95,9 +99,6 @@ class DMC {
 
   AddrCache* addr_cache;
   DMC_TYPE dmc_type;
-  vector<DataSetItem> reader_set;
-  vector<DataSetItem> writer_set;
-  vector<DataSetItem> updater_set;
 };
 
 ALWAYS_INLINE
@@ -107,6 +108,6 @@ ALWAYS_INLINE
 void DMC::AddToReadOnlySet(DataItemPtr item) {
   DataSetItem data_set_item {
     .item_ptr = std::move(item), .is_fetched = false, .addr = 0;
-    }
+  }
   reader_set.emplace_back(data_set_item);
 }
