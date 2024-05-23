@@ -42,7 +42,7 @@ class DMC {
  public:
   DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
       CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-      AddrCache* addr_buf);
+      AddrCache* addr_buf, DMC_TYPE type);
   MetaManager* global_meta_man;  // Global metadata manager
                                  // native
   bool open(string path, coro_yield_t& yield);

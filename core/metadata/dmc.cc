@@ -22,7 +22,7 @@ bool DMC::open(string path, coro_yield_t& yield) {
   // You can read from primary or backup
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-  vector<NameID> paths = path_resolution(path);
+  // vector<NameID> paths = path_resolution(path);
   if (dmc_type == DMC_TYPE::native) {
     // get all the inode
   } else if (dmc_type == DMC_TYPE::disaggregated) {
