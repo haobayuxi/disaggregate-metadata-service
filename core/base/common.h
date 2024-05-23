@@ -5,6 +5,7 @@
 
 #include <cstddef>  // For size_t
 #include <cstdint>  // For uintxx_t
+#include <string>
 
 #include "flags.h"
 
