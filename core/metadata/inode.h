@@ -23,11 +23,11 @@ struct NameID {
   string name;
 };
 
-vector<uint64_t> path_resolution(string path) {
-  vector<uint64_t> path_ids;
+// vector<uint64_t> path_resolution(string path) {
+//   vector<uint64_t> path_ids;
 
-  return path_ids;
-}
+//   return path_ids;
+// }
 
 struct DataSetItem {
   DataItemPtr item_ptr;
