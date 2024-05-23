@@ -78,6 +78,7 @@ class DMC {
 
   void Begin();
   void AddToReadOnlySet(DataItemPtr item);
+  int64_t compute_hash(string const& s);
 
   vector<DataSetItem> reader_set;
   vector<DataSetItem> writer_set;
@@ -117,7 +118,7 @@ void DMC::AddToReadOnlySet(DataItemPtr item) {
 
 // uint64_t get_permission_offset(uint64_t addr) { return addr; }
 
-int64_t compute_hash(string const& s) {
+int64_t DMC::compute_hash(string const& s) {
   const int p = 31;
   const int m = 1e9 + 9;
   uint64_t hash_value = 0;
