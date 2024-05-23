@@ -1,3 +1,6 @@
+#ifdef INODE_H
+#define INODE_H
+
 #include <stdint.h>
 
 #include <vector>
@@ -91,3 +94,5 @@ struct InsertOffRead {
   const HashMeta meta;
   offset_t node_off;
 };
+
+#endif

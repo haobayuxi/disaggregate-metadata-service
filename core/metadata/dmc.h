@@ -1,5 +1,5 @@
-#ifndef TKDATABASE_SERVER_H
-#define TKDATABASE_SERVER_H
+#ifndef DMC_H
+#define DMC_H
 #pragma once
 
 #include <time.h>
