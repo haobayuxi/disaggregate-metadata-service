@@ -36,8 +36,8 @@ set(SCHEDULER_SRC
 add_library(ford STATIC
         ${CONNECTION_SRC}
         # ${DTX_SRC}
-        ${DMC_SRC}
         ${SCHEDULER_SRC}
+        ${DMC_SRC}
         )
 
 set_target_properties(ford PROPERTIES LINKER_LANGUAGE CXX)
