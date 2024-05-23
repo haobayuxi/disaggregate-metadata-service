@@ -26,7 +26,7 @@
 #include "connection/qp_manager.h"
 #include "inode.h"
 #include "memstore/hash_store.h"
-#include "scheduler/coroutine.h"
+#include "scheduler/coroutine_scheduler.h"
 #include "util/debug.h"
 #include "util/hash.h"
 #include "util/json_config.h"
