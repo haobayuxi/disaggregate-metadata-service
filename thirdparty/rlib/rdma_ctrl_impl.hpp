@@ -445,7 +445,6 @@ class RdmaCtrl::RdmaCtrlImpl {
     }
     // end of the server
     close(listenfd);
-    return;
   }
 
  private:
