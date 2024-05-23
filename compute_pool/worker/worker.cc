@@ -44,9 +44,6 @@ __thread t_id_t thread_num;
 __thread MetaManager* meta_man;
 __thread QPManager* qp_man;
 
-__thread VersionCache* status;
-__thread LockCache* lock_table;
-
 __thread RDMABufferAllocator* rdma_buffer_allocator;
 __thread LogOffsetAllocator* log_offset_allocator;
 __thread AddrCache* addr_cache;
