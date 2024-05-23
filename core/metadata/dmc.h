@@ -106,8 +106,7 @@ void DMC::Begin() {}
 
 ALWAYS_INLINE
 void DMC::AddToReadOnlySet(DataItemPtr item) {
-  DataSetItem data_set_item {
-    .item_ptr = std::move(item), .is_fetched = false, .addr = 0;
-  }
+  DataSetItem data_set_item{
+      .item_ptr = std::move(item), .is_fetched = false, .addr = 0};
   reader_set.emplace_back(data_set_item);
 }
