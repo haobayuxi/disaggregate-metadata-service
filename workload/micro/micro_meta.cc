@@ -5,8 +5,6 @@
 
 #include <set>
 
-#include "metadata/dmc.h"
-
 /******************** The business logic (Transaction) start
  * ********************/
 
