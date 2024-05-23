@@ -230,8 +230,6 @@ void run_thread(thread_params* params) {
   thread_local_id = params->thread_local_id;
   thread_num = params->thread_num_per_machine;
   meta_man = params->global_meta_man;
-  status = params->global_status;
-  lock_table = params->global_lcache;
   coro_num = (coro_id_t)params->coro_num;
   coro_sched = new CoroutineScheduler(thread_gid, coro_num);
 
