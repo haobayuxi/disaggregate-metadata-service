@@ -20,7 +20,6 @@
 #include "allocator/log_allocator.h"
 #include "base/common.h"
 #include "cache/addr_cache.h"
-#include "cache/version_status.h"
 #include "connection/meta_manager.h"
 #include "connection/qp_manager.h"
 #include "doorbell.h"
