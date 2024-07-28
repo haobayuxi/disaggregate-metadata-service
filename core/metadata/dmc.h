@@ -49,6 +49,7 @@ class DMC {
                                  // native
   bool open(string path, coro_yield_t& yield);
   bool close(string path, coro_yield_t& yield);
+  bool stat_file(string path, coro_yield_t& yield);
   bool read(string path, coro_yield_t& yield);
   bool write(string path, coro_yield_t& yield);
   bool create(string path, coro_yield_t& yield);
@@ -65,6 +66,7 @@ class DMC {
   bool IssueReader(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro);
   bool IssueUpdater(std::vector<CasRead>& pending_cas_rw);
+  bool IssueWriter(std::vector<CasRead>& pending_cas_rw);
   //  check
   bool CheckReadRO(std::vector<DirectRead>& pending_direct_ro,
                    std::vector<HashRead>& pending_hash_ro,

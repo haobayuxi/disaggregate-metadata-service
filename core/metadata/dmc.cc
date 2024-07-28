@@ -22,13 +22,22 @@ bool DMC::open(string path, coro_yield_t& yield) {
   // You can read from primary or backup
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-  // vector<NameID> paths = path_resolution(path);
+  vector<NameID> paths = path_resolution(path);
   if (dmc_type == DMC_TYPE::native) {
     // get all the inode
   } else if (dmc_type == DMC_TYPE::disaggregated) {
     // check cache
-    // for () {
-    // }
+    for (NameID id : paths) {
+      auto cache_inode = addr_cache->Search(node_id, it->key);
+      if (cache_inode != NOT_FOUND) {
+        // find the cache
+        
+      } else {
+        // insert into
+
+      }
+    }
+
     // get the inode that is not in the cache
   }
   if (!IssueReader(pending_direct_ro, pending_hash_ro)) return false;
@@ -45,8 +54,22 @@ bool DMC::open(string path, coro_yield_t& yield) {
 }
 bool DMC::close(string path, coro_yield_t& yield) { return true; }
 
-bool read(string path, coro_yield_t& yield) { return true; }
-bool write(string path, coro_yield_t& yield) { return true; }
+bool DMC::stat_file(string path, coro_yield_t& yield) {
+  if (dmc_type == DMC_TYPE::native) {
+    // get all the inode
+    // check permission
+    // lock the parent and the entry list, insert new inode
+    // update parent inode and entry list
+  } else if (dmc_type == DMC_TYPE::disaggregated) {
+    // check cache
+    // get the inode
+  }
+
+  return true;
+}
+
+bool DMC::read(string path, coro_yield_t& yield) { return true; }
+bool DMC::write(string path, coro_yield_t& yield) { return true; }
 bool DMC::create(string path, coro_yield_t& yield) {
   if (dmc_type == DMC_TYPE::native) {
     // get all the inode

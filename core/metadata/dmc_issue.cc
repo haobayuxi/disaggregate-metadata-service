@@ -63,6 +63,10 @@ bool DMC::IssueUpdater(std::vector<CasRead>& pending_cas_rw) {
   return true;
 }
 
+// bool DMC::IssueWriter() {
+
+// }
+
 // bool DTX::IssueReadLock(std::vector<CasRead>& pending_cas_rw,
 //                         std::vector<HashRead>& pending_hash_rw,
 //                         std::vector<InsertOffRead>& pending_insert_off_rw) {

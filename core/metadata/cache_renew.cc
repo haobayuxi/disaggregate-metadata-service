@@ -32,11 +32,18 @@
 
 class CacheRenewer {
  public:
+  int lease;
+  uint64_t version;
   void renew();
 };
 
 void CacheRenewer::renew() {
   //
   sleep(1);
-  // renew using rdma read
+  // renew using rdma read the version
+
+  uint64_t remote_version = 0;
+  if (remote_version != version) {
+    
+  }
 }

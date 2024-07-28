@@ -6,8 +6,7 @@
 #include "base/common.h"
 
 // 64-bit hash for 64-bit platforms
-static ALWAYS_INLINE
-uint64_t MurmurHash64A(uint64_t key, unsigned int seed) {
+static ALWAYS_INLINE uint64_t MurmurHash64A(uint64_t key, unsigned int seed) {
   const uint64_t m = 0xc6a4a7935bd1e995;
   const int r = 47;
   uint64_t h = seed ^ (8 * m);
@@ -50,8 +49,8 @@ uint64_t MurmurHash64A(uint64_t key, unsigned int seed) {
   return h;
 }
 
-static ALWAYS_INLINE
-uint64_t MurmurHash64ALen(const char* key, uint32_t len, uint64_t seed) {
+static ALWAYS_INLINE uint64_t MurmurHash64ALen(const char* key, uint32_t len,
+                                               uint64_t seed) {
   const uint64_t m = 0xc6a4a7935bd1e995;
   const int r = 47;
 
@@ -59,8 +58,8 @@ uint64_t MurmurHash64ALen(const char* key, uint32_t len, uint64_t seed) {
 
   const uint64_t* data = (const uint64_t*)key;
   const uint64_t* end = data + (len / 8);
-
-  while (data != end) {
+  int _len = 0;
+  while (_len < len) {
     uint64_t k = *data++;
 
     k *= m;
@@ -69,6 +68,7 @@ uint64_t MurmurHash64ALen(const char* key, uint32_t len, uint64_t seed) {
 
     h ^= k;
     h *= m;
+    _len++;
   }
 
   const unsigned char* data2 = (const unsigned char*)data;

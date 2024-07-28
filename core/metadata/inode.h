@@ -15,6 +15,7 @@ struct Inode {
   uint16_t atime;
   uint16_t ctime;
   uint16_t mtime;
+  bool is_dir;
 };
 const size_t inode_size = sizeof(Inode);
 
@@ -23,11 +24,22 @@ struct NameID {
   string name;
 };
 
-// vector<uint64_t> path_resolution(string path) {
-//   vector<uint64_t> path_ids;
+vector<NameID> path_resolution(string path) {
+  vector<NameID> path_ids;
 
-//   return path_ids;
-// }
+  int pos = 0;
+  while (true) {
+    pos = path.find('/', 1);
+    if (pos > 0) {
+      //
+      
+    } else {
+      break;
+    }
+  }
+
+  return path_ids;
+}
 
 struct DataSetItem {
   DataItemPtr item_ptr;

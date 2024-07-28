@@ -8,15 +8,18 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <unordered_map>
 
 #include "memstore/data_item.h"
 #include "memstore/hash_store.h"
+#include "metadata/inode.h"
 #include "rlib/rdma_ctrl.hpp"
 
 // Load DB
 #include "micro/micro_db.h"
 
 using namespace rdmaio;
+using namespace std;
 
 class Server {
  public:
@@ -80,6 +83,8 @@ class Server {
   void CleanQP();
 
   bool Run();
+
+  unordered_map<string, Inode> inodes;
 
  private:
   const int server_node_id;
