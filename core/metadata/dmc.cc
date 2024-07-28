@@ -6,7 +6,7 @@ using namespace std;
 
 DMC::DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
          CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-         AddrCache* addr_buf, DMC_TYPE type) {
+         AddrCache* addr_buf, DMC_TYPE type, int servers_) {
   t_id = tid;
   coro_id = coroid;
   coro_sched = sched;
@@ -16,6 +16,7 @@ DMC::DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
 
   addr_cache = addr_buf;
   dmc_type = type;
+  servers = servers_;
 }
 
 bool DMC::open(string path, coro_yield_t& yield) {
@@ -29,21 +30,21 @@ bool DMC::open(string path, coro_yield_t& yield) {
     // check cache
     for (NameID id : paths) {
       InodeCacheItem_t cache_inode;
-
-      if (addr_cache->Search(node_id, it->key, &cache_inode)) {
+      int node_id = id->key % servers;
+      if (addr_cache->Search(node_id, id->key, &cache_inode)) {
         if (cache_inode.inode.is_dir) {
           // is dir check permission
 
         }else {
           // not dir, insert into readerset
         DataItemPtr dir =
-          std::make_shared<DataItem>(0, id.id);
+          std::make_shared<DataItem>(0, id.key);
           
         }
       }else {
         
         // insert into readset
-        reader_set.push_back();
+        // reader_set.push_back();
       }
     }
   }

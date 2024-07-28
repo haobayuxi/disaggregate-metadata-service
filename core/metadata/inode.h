@@ -20,7 +20,7 @@ struct Inode {
 const size_t inode_size = sizeof(Inode);
 
 struct NameID {
-  uint64_t id;
+  uint64_t key;
   string name;
 };
 
@@ -40,13 +40,6 @@ vector<NameID> path_resolution(string path) {
 
   return path_ids;
 }
-
-struct DataSetItem {
-  DataItemPtr item_ptr;
-  bool is_fetched;
-  uint64_t addr;
-  int read_which_node;
-};
 
 struct OldVersionForInsert {
   table_id_t table_id;

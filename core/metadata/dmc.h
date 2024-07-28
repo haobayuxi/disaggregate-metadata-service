@@ -20,7 +20,7 @@
 #include "allocator/buffer_allocator.h"
 #include "allocator/log_allocator.h"
 #include "base/common.h"
-#include "cache/addr_cache.h"
+#include "addr_cache.h"
 #include "connection/meta_manager.h"
 #include "connection/qp_manager.h"
 #include "doorbell.h"
@@ -44,7 +44,7 @@ class DMC {
  public:
   DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
       CoroutineScheduler* sched, RDMABufferAllocator* rdma_buffer_allocator,
-      AddrCache* addr_buf, DMC_TYPE type);
+      AddrCache* addr_buf, DMC_TYPE type, int servers_);
   MetaManager* global_meta_man;  // Global metadata manager
                                  // native
   bool open(string path, coro_yield_t& yield);
@@ -87,6 +87,8 @@ class DMC {
   vector<DataSetItem> writer_set;
   vector<DataSetItem> updater_set;
   vector<DataSetItem> insert_set;
+
+  int servers;
 
  private:
   tx_id_t tx_id;  // Transaction ID
