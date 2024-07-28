@@ -6,7 +6,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "common.h"
+#include "base/common.h"
 #include "cuckoohash_map.hh"
 #include "inode.h"
 
