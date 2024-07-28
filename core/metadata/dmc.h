@@ -86,6 +86,7 @@ class DMC {
   vector<DataSetItem> reader_set;
   vector<DataSetItem> writer_set;
   vector<DataSetItem> updater_set;
+  vector<DataSetItem> insert_set;
 
  private:
   tx_id_t tx_id;  // Transaction ID
@@ -105,16 +106,51 @@ class DMC {
 };
 
 ALWAYS_INLINE
-void DMC::Begin() {}
+void DMC::Begin() {
+  reader_set.clear();
+  updater_set.clear();
+  writer_set.clear();
+  insert_set.clear();
+}
 
 ALWAYS_INLINE
-void DMC::AddToReadOnlySet(DataItemPtr item) {
+void DMC::AddToReaderSet(DataItemPtr item) {
   DataSetItem data_set_item{
       .item_ptr = std::move(item),
       .is_fetched = false,
       .read_which_node = -1,
   };
   reader_set.emplace_back(data_set_item);
+}
+
+ALWAYS_INLINE
+void DMC::AddToUpdaterSet(DataItemPtr item) {
+  DataSetItem data_set_item{
+      .item_ptr = std::move(item),
+      .is_fetched = false,
+      .read_which_node = -1,
+  };
+  updater_set.emplace_back(data_set_item);
+}
+
+ALWAYS_INLINE
+void DMC::AddToWriterSet(DataItemPtr item) {
+  DataSetItem data_set_item{
+      .item_ptr = std::move(item),
+      .is_fetched = false,
+      .read_which_node = -1,
+  };
+  writer_set.emplace_back(data_set_item);
+}
+
+ALWAYS_INLINE
+void DMC::AddToInsertSet(DataItemPtr item) {
+  DataSetItem data_set_item{
+      .item_ptr = std::move(item),
+      .is_fetched = false,
+      .read_which_node = -1,
+  };
+  insert_set.emplace_back(data_set_item);
 }
 
 // uint64_t get_time_offset(uint64_t addr) { return addr + sizeof(uint64_t); }

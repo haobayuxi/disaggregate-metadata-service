@@ -32,7 +32,7 @@ class AddrCache {
 
   // We know which node to read, but we do not konw whether it is cached before
   ALWAYS_INLINE
-  bool Search(node_id_t remote_node_id, itemkey_t key, InodeCacheItem_t &inode) {
+  bool  Search(node_id_t remote_node_id, itemkey_t key,InodeCacheItem_t &inode) {
     if (addr_map[remote_node_id].find(key, inode)) {
       return true;
     } else {
