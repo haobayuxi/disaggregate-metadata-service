@@ -28,7 +28,7 @@ bool DMC::open(string path, coro_yield_t& yield) {
   } else if (dmc_type == DMC_TYPE::disaggregated) {
     // check cache
     for (NameID id : paths) {
-      InodeCacheItem_t cache_inode;
+      InodeCacheItem cache_inode;
       int node_id = id.key % servers;
       if (addr_cache->Search(node_id, id.key, &cache_inode)) {
         if (cache_inode.inode.is_dir) {
@@ -67,7 +67,7 @@ bool DMC::stat_file(string path, coro_yield_t& yield) {
   } else if (dmc_type == DMC_TYPE::disaggregated) {
     // check cache
     for (NameID id : paths) {
-      InodeCacheItem_t cache_inode;
+      InodeCacheItem cache_inode;
 
       if (addr_cache->Search(node_id, it->key, &cache_inode)) {
         if (cache_inode.inode.is_dir) {
@@ -106,7 +106,7 @@ bool DMC::create(string path, coro_yield_t& yield) {
   } else if (dmc_type == DMC_TYPE::disaggregated) {
     // check cache
     for (NameID id : paths) {
-      InodeCacheItem_t cache_inode;
+      InodeCacheItem cache_inode;
 
       if (addr_cache->Search(node_id, it->key, &cache_inode)) {
         if (cache_inode.inode.is_dir) {

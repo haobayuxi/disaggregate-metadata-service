@@ -12,16 +12,16 @@
 
 const offset_t NOT_FOUND = -1;
 
-struct InodeCacheItem{
+struct InodeCacheItem {
   uint64_t addr;
-  
+
   struct Inode inode;
-}InodeCacheItem_t;
+};
 
 // For fast remote address lookup
 class AddrCache {
  public:
-  void Insert(node_id_t remote_node_id, itemkey_t key, InodeCacheItem_t inode) {
+  void Insert(node_id_t remote_node_id, itemkey_t key, InodeCacheItem inode) {
     // The node and table both exist, then insert/update the <key,offset> pair
     addr_map[remote_node_id].insert(key, inode);
   }
@@ -32,7 +32,7 @@ class AddrCache {
 
   // We know which node to read, but we do not konw whether it is cached before
   ALWAYS_INLINE
-  bool  Search(node_id_t remote_node_id, itemkey_t key,InodeCacheItem_t &inode) {
+  bool Search(node_id_t remote_node_id, itemkey_t key, InodeCacheItem &inode) {
     if (addr_map[remote_node_id].find(key, inode)) {
       return true;
     } else {
@@ -63,5 +63,5 @@ class AddrCache {
   //     offset_t>>> addr_map;
 
   // std::unordered_map<itemkey_t, offset_t> addr_map[1][20];
-  libcuckoo::cuckoohash_map<int, InodeCacheItem_t> addr_map[4];
+  libcuckoo::cuckoohash_map<uint64_t, InodeCacheItem> addr_map[4];
 };
