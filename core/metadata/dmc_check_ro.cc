@@ -13,7 +13,7 @@ bool DMC::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro,
         res.item->is_fetched = true;
       } else {
         // The item is deleted before, then update the local cache
-        addr_cache->remote(res.remote_node, it->key);
+        addr_cache->Remove(res.remote_node, it->key);
         return false;
       }
     } else {
@@ -52,8 +52,9 @@ bool DMC::CheckHashRO(std::vector<HashRead>& pending_hash_ro,
     for (auto& item : local_hash_node->data_items) {
       if (item.valid && item.key == it->key && item.table_id == it->table_id) {
         *it = item;
-        addr_cache->Insert(res.remote_node, it->table_id, it->key,
-                           it->remote_offset);
+        // todo insert cache inode
+        // addr_cache->Insert(res.remote_node, it->table_id, it->key,
+        //                    it->remote_offset);
         res.item->is_fetched = true;
         find = true;
         break;

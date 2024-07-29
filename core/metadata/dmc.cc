@@ -30,7 +30,7 @@ bool DMC::open(string path, coro_yield_t& yield) {
     for (NameID id : paths) {
       InodeCacheItem cache_inode;
       int node_id = id.key % servers;
-      if (addr_cache->Search(node_id, id.key, &cache_inode)) {
+      if (addr_cache->Search(node_id, id.key, InodeCacheItem & cache_inode)) {
         if (cache_inode.inode.is_dir) {
           // is dir check permission
 
@@ -69,7 +69,7 @@ bool DMC::stat_file(string path, coro_yield_t& yield) {
     for (NameID id : paths) {
       InodeCacheItem cache_inode;
 
-      if (addr_cache->Search(node_id, it->key, &cache_inode)) {
+      if (addr_cache->Search(node_id, it->key, InodeCacheItem & cache_inode)) {
         if (cache_inode.inode.is_dir) {
           // is dir check permission
 
@@ -108,7 +108,7 @@ bool DMC::create(string path, coro_yield_t& yield) {
     for (NameID id : paths) {
       InodeCacheItem cache_inode;
 
-      if (addr_cache->Search(node_id, it->key, &cache_inode)) {
+      if (addr_cache->Search(node_id, it->key, InodeCacheItem & cache_inode)) {
         if (cache_inode.inode.is_dir) {
           // is dir check permission
 
