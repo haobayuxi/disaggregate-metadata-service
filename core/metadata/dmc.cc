@@ -25,7 +25,7 @@ bool DMC::close(string path, coro_yield_t& yield) { return true; }
 bool DMC::stat_file(string path, coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-  vector<NameID> paths = path_resolution(path);
+  vector<NameID> paths;
   if (dmc_type == DMC_TYPE::native) {
     // get all the inode
   } else if (dmc_type == DMC_TYPE::disaggregated) {

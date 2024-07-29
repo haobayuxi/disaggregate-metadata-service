@@ -9,13 +9,6 @@
 #include <functional>
 #include <memory>
 
-#include "allocator/buffer_allocator.h"
-#include "allocator/log_allocator.h"
-#include "connection/qp_manager.h"
-#include "micro/micro_meta.h"
-#include "util/latency.h"
-#include "util/zipf.h"
-
 using namespace std::placeholders;
 
 // All the functions are executed in each thread
