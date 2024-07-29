@@ -88,7 +88,7 @@ class DMC {
   bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
 
   void Begin();
-  void AddToReaderlySet(DataItemPtr item);
+  void AddToReaderSet(DataItemPtr item);
   void AddToUpdaterSet(DataItemPtr item);
   void AddToWriterSet(DataItemPtr item);
   void AddToInsertSet(DataItemPtr item);
