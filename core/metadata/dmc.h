@@ -26,7 +26,7 @@
 #include "doorbell.h"
 #include "inode.h"
 #include "memstore/hash_store.h"
-#include "struct.h"
+// #include "struct.h"
 #include "util/debug.h"
 #include "util/hash.h"
 #include "util/json_config.h"
