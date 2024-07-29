@@ -17,10 +17,10 @@
 #include <utility>
 #include <vector>
 
+#include "addr_cache.h"
 #include "allocator/buffer_allocator.h"
 #include "allocator/log_allocator.h"
 #include "base/common.h"
-#include "addr_cache.h"
 #include "connection/meta_manager.h"
 #include "connection/qp_manager.h"
 #include "doorbell.h"
@@ -39,6 +39,14 @@ ALWAYS_INLINE
 uint32_t get_inode_crc(struct Inode* inode) {
   return CRC::Calculate(inode, inode_size - 16, CRC::CRC_32());
 }
+
+struct DataSetItem {
+  DataItemPtr item_ptr;
+  bool is_fetched;
+  bool is_logged;
+  node_id_t read_which_node;  // From which node this data item is read. This is
+                              // a node id, e.g., 0, 1, 2...
+};
 
 class DMC {
  public:
@@ -80,7 +88,10 @@ class DMC {
   bool CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro);
 
   void Begin();
-  void AddToReadOnlySet(DataItemPtr item);
+  void AddToReaderlySet(DataItemPtr item);
+  void AddToUpdaterSet(DataItemPtr item);
+  void AddToWriterSet(DataItemPtr item);
+  void AddToInsertSet(DataItemPtr item);
   int64_t compute_hash(string const& s);
 
   vector<DataSetItem> reader_set;
