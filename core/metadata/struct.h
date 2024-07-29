@@ -6,7 +6,7 @@ struct NameID {
   string name;
 };
 
-vector<NameID> path_resolution(string path) {
+vector<NameID> path_resolution1(string path) {
   vector<NameID> path_ids;
 
   int pos = 0;
