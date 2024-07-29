@@ -83,3 +83,20 @@ bool DMC::read_dir(string path, coro_yield_t& yield) { return true; }
 // bool DMC::stat_dir(string path, coro_yield_t& yield) { return true; }
 bool DMC::mkdir(string path, coro_yield_t& yield) { return true; }
 bool DMC::rmdir(string path, coro_yield_t& yield) { return true; }
+
+vector<NameID> path_resolution1(string path) {
+  vector<NameID> path_ids;
+
+  int pos = 0;
+  while (true) {
+    pos = path.find('/', 1);
+    if (pos > 0) {
+      //
+
+    } else {
+      break;
+    }
+  }
+
+  return path_ids;
+}

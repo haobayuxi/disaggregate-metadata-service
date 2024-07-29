@@ -36,6 +36,8 @@ enum DMC_TYPE : int {
   disaggregated = 1,
 };
 
+vector<NameID> path_resolution1(string path);
+
 ALWAYS_INLINE
 uint32_t get_inode_crc(struct Inode* inode) {
   return CRC::Calculate(inode, inode_size - 16, CRC::CRC_32());
