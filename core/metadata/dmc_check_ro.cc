@@ -89,8 +89,9 @@ bool DMC::CheckNextHashRO(std::list<HashRead>& pending_next_hash_ro) {
     for (auto& item : local_hash_node->data_items) {
       if (item.valid && item.key == it->key && item.table_id == it->table_id) {
         *it = item;
-        addr_cache->Insert(res.remote_node, it->table_id, it->key,
-                           it->remote_offset);
+        // todo insert cache inode
+        // addr_cache->Insert(res.remote_node, it->table_id, it->key,
+        //                    it->remote_offset);
         res.item->is_fetched = true;
         find = true;
         break;
