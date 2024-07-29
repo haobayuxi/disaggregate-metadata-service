@@ -8,6 +8,8 @@
 using namespace std;
 
 #include "base/common.h"
+#include "connection/meta_manager.h"
+#include "connection/qp_manager.h"
 #include "util/crc.h"
 
 struct Inode {
@@ -18,6 +20,14 @@ struct Inode {
   bool is_dir;
 };
 const size_t inode_size = sizeof(Inode);
+
+struct DataSetItem {
+  DataItemPtr item_ptr;
+  bool is_fetched;
+  bool is_logged;
+  node_id_t read_which_node;  // From which node this data item is read. This is
+                              // a node id, e.g., 0, 1, 2...
+};
 
 struct NameID {
   uint64_t key;
@@ -32,7 +42,7 @@ vector<NameID> path_resolution(string path) {
     pos = path.find('/', 1);
     if (pos > 0) {
       //
-      
+
     } else {
       break;
     }

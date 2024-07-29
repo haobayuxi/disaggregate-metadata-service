@@ -40,14 +40,6 @@ uint32_t get_inode_crc(struct Inode* inode) {
   return CRC::Calculate(inode, inode_size - 16, CRC::CRC_32());
 }
 
-struct DataSetItem {
-  DataItemPtr item_ptr;
-  bool is_fetched;
-  bool is_logged;
-  node_id_t read_which_node;  // From which node this data item is read. This is
-                              // a node id, e.g., 0, 1, 2...
-};
-
 class DMC {
  public:
   DMC(MetaManager* meta_man, QPManager* qp_man, t_id_t tid, coro_id_t coroid,
