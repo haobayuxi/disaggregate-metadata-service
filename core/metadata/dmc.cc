@@ -32,8 +32,9 @@ bool DMC::stat_file(string path, coro_yield_t& yield) {
     // check cache
     for (NameID id : paths) {
       InodeCacheItem cache_inode;
+      InodeCacheItem& cache_inodes = cache_inode;
       auto node_id = id.key % servers;
-      if (addr_cache->Search(node_id, id.key, InodeCacheItem & cache_inode)) {
+      if (addr_cache->Search(node_id, id.key, cache_inodes)) {
         if (cache_inode.inode.is_dir) {
           // is dir check permission
 
