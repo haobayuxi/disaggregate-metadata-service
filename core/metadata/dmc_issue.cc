@@ -10,7 +10,7 @@ bool DMC::IssueReader(std::vector<DirectRead>& pending_direct_ro,
 
     item.read_which_node = remote_node_id;
     RCQP* qp = thread_qp_man->GetRemoteDataQPWithNodeID(remote_node_id);
-    auto offset = addr_cache->Search(remote_node_id, it->table_id, it->key);
+    auto offset = item.offset;
     if (offset != NOT_FOUND) {
       it->remote_offset = offset;
       char* data_buf = thread_rdma_buffer_alloc->Alloc(DataItemSize);

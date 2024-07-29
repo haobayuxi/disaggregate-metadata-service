@@ -28,7 +28,7 @@ class AddrCache {
 
   void Remove(node_id_t remote_node_id, itemkey_t key) {
     // The node and table both exist, then insert/update the <key,offset> pair
-    addr_map[remote_node_id].remove(key);
+    addr_map[remote_node_id].erase(key);
   }
 
   void resize() {
