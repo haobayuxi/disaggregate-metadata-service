@@ -13,7 +13,7 @@ bool DMC::CheckDirectRO(std::vector<DirectRead>& pending_direct_ro,
         res.item->is_fetched = true;
       } else {
         // The item is deleted before, then update the local cache
-        addr_cache->Insert(res.remote_node, it->table_id, it->key, NOT_FOUND);
+        addr_cache->remote(res.remote_node, it->key);
         return false;
       }
     } else {

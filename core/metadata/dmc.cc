@@ -78,7 +78,7 @@ bool DMC::stat_file(string path, coro_yield_t& yield) {
         }
       } else {
         // insert into readset
-        reader_set.push();
+        // reader_set.push();
       }
     }
   }

@@ -26,6 +26,11 @@ class AddrCache {
     addr_map[remote_node_id].insert(key, inode);
   }
 
+  void Remote(node_id_t remote_node_id, itemkey_t key) {
+    // The node and table both exist, then insert/update the <key,offset> pair
+    addr_map[remote_node_id].remove(key);
+  }
+
   void resize() {
     // addr_map[1][1].rehash(100000);
   }
