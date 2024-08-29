@@ -8,7 +8,7 @@ set(CONNECTION_SRC
 
 
 set(DMC_SRC
-        metadata/dmc_check_ro.cc
+        metadata/dmc_check_reader.cc
         metadata/dmc_check.cc
         metadata/dmc_issue.cc
         metadata/dmc.cc
