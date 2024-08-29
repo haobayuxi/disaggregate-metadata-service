@@ -25,7 +25,7 @@ bool DMC::close(string path, coro_yield_t& yield) { return true; }
 bool DMC::stat_file(string path, coro_yield_t& yield) {
   std::vector<DirectRead> pending_direct_ro;
   std::vector<HashRead> pending_hash_ro;
-  vector<NameID> paths;
+  vector<NameID> paths = path_resolution(path);
   if (dmc_type == DMC_TYPE::native) {
     // get all the inode
   } else if (dmc_type == DMC_TYPE::disaggregated) {
@@ -40,10 +40,13 @@ bool DMC::stat_file(string path, coro_yield_t& yield) {
 
         } else {
           // not dir, insert into readerset
+          DataItemPtr read = std::make_shared<DataItem>(0, id.key);
+          AddToReaderSet(read);
         }
       } else {
         // insert into readset
-        // reader_set.push();
+        DataItemPtr read = std::make_shared<DataItem>(0, id.key);
+        AddToReaderSet(read);
       }
     }
   }
@@ -60,17 +63,41 @@ bool DMC::stat_file(string path, coro_yield_t& yield) {
   return true;
 }
 
-bool DMC::read(string path, coro_yield_t& yield) { return true; }
-bool DMC::write(string path, coro_yield_t& yield) { return true; }
-bool DMC::create(string path, coro_yield_t& yield) {
-  //   check results
+bool DMC::read(string path, coro_yield_t& yield) { 
+  // modify the access time
+if (dmc_type == DMC_TYPE::native) {
+    // lock inode
 
+    // modify the access time
+
+    // apply update and release the lock 
+
+  } else if (dmc_type == DMC_TYPE::disaggregated) {
+    // check cache
+
+    }
+
+
+  return true; }
+bool DMC::write(string path, coro_yield_t& yield) { 
+  // modify the mtime
+  // lock 
+  return true; }
+bool DMC::create(string path, coro_yield_t& yield) {
+  
+  
   return true;
 }
-bool DMC::_delete(string path, coro_yield_t& yield) { return true; }
-bool DMC::rename(string old_path, string new_path, coro_yield_t& yield) {
-  // get the flag
+bool DMC::_delete(string path, coro_yield_t& yield) { 
+  // set the bool flag
 
+  return true; }
+bool DMC::rename(string old_path, string new_path, coro_yield_t& yield) {
+  // get the rename lock 
+
+
+
+  // lock all the tuple
   return true;
 }
 bool DMC::set_permission(string path, uint64_t permission,
@@ -82,9 +109,11 @@ bool DMC::set_permission(string path, uint64_t permission,
 bool DMC::read_dir(string path, coro_yield_t& yield) { return true; }
 // bool DMC::stat_dir(string path, coro_yield_t& yield) { return true; }
 bool DMC::mkdir(string path, coro_yield_t& yield) { return true; }
-bool DMC::rmdir(string path, coro_yield_t& yield) { return true; }
+bool DMC::rmdir(string path, coro_yield_t& yield) { 
+  // delete all the tuples
+  return true; }
 
-vector<NameID> path_resolution1(string path) {
+vector<NameID> path_resolution(string path) {
   vector<NameID> path_ids;
 
   int pos = 0;
@@ -92,6 +121,10 @@ vector<NameID> path_resolution1(string path) {
     pos = path.find('/', 1);
     if (pos > 0) {
       //
+      NameID nid;
+      nid.name = path.substr(0,pos);
+      nid.key = compute_hash(nid.name);
+      path_ids.push_back(nid);
 
     } else {
       break;

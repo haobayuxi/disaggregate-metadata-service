@@ -36,7 +36,7 @@ enum DMC_TYPE : int {
   disaggregated = 1,
 };
 
-vector<NameID> path_resolution1(string path);
+vector<NameID> path_resolution(string path);
 
 ALWAYS_INLINE
 uint32_t get_inode_crc(struct Inode* inode) {
@@ -165,7 +165,7 @@ void DMC::AddToInsertSet(DataItemPtr item) {
 
 // uint64_t get_permission_offset(uint64_t addr) { return addr; }
 ALWAYS_INLINE
-int64_t DMC::compute_hash(string const& s) {
+uint64_t DMC::compute_hash(string const& s) {
   const int p = 31;
   const int m = 1e9 + 9;
   uint64_t hash_value = 0;

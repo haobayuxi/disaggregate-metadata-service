@@ -30,3 +30,7 @@ enum OP : int {
   f_chmod_chown = 14,
   f_mkdir = 15,
 };
+
+bool 
+
+bool test_stat_file(uint64_t* seed, coro_yield_t& yield, tx_id_t tx_id, DMC* dmc);
